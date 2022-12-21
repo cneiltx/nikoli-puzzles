@@ -5,8 +5,10 @@ interface IAppState {
   rows: number;
   columns: number;
   status: string;
+  dialog: string;
   handleStart: (game: string, rows: number, columns: number) => void;
   handleNewGame: () => void;
+  handleNewGameConfirm: (button: string) => void;
 }
 
 const AppState = (): IAppState => {
@@ -14,6 +16,7 @@ const AppState = (): IAppState => {
   const [columns, setColumns] = useState(0);
   const [rows, setRows] = useState(0);
   const [status, setStatus] = useState("new");
+  const [dialog, setDialog] = useState("");
 
   const handleStart = (game: string, rows: number, columns: number) => {
     setGame(game);
@@ -23,12 +26,17 @@ const AppState = (): IAppState => {
   };
 
   const handleNewGame = () => {
-    if (window.confirm("Are you sure you want to start a new game?")) {
-      setStatus("new");
-    }
+    setDialog("newGame");
   }
 
-  return { game, rows, columns, status, handleStart, handleNewGame };
+  const handleNewGameConfirm = (button: string) => {
+    if (button === "OK") {
+      setStatus("new");
+    }
+    setDialog("");
+  }
+
+  return { game, rows, columns, status, dialog, handleStart, handleNewGame, handleNewGameConfirm };
 };
 
 export default AppState;

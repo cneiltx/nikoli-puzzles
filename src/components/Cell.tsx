@@ -14,7 +14,7 @@ const Cell = (props: IProps) => {
     <div
       className="cell"
       style={{
-        fontSize: 35 / rows + "vmin",
+        fontSize: 35 / rows + "vh",
       }}
       onClick={() => handleClick(row, col)}
       onContextMenu={(e) => {

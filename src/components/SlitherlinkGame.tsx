@@ -1,5 +1,6 @@
 import Cell from "./Cell";
 import Corner from "./Corner";
+import Dialog from "./Dialog";
 import HEdge from "./HEdge";
 import VEdge from "./VEdge";
 import SlitherlinkState from "../hooks/SlitherlinkState";
@@ -39,17 +40,20 @@ const SlitherlinkGame = (props: IProps) => {
       <div
         className="gameBoard"
         style={{
-          gridTemplateColumns: "10fr 80fr ".repeat(columns).concat("10fr"),
-          gridTemplateRows: "10fr 80fr ".repeat(rows).concat("10fr"),
+          gridTemplateColumns: "20fr 100fr ".repeat(columns).concat("20fr"),
+          gridTemplateRows: "20fr 100fr ".repeat(rows).concat("20fr"),
         }}
       >
         {content}
       </div>
       <div className="buttonRow">
-        <button onClick={handleNewGame}>New Game</button>
-        <button onClick={game.handleReset}>Reset</button>
-        <button onClick={game.handleSolve}>Solve</button>
+        <button onClick={handleNewGame} disabled={game.dialog !== ""}>New Game</button>
+        <button onClick={game.handleReset} disabled={game.dialog !== ""}>Reset</button>
+        <button onClick={game.handleSolve} disabled={game.dialog !== ""}>Solve</button>
       </div>
+      {game.dialog === "reset" && <Dialog message="Are you sure you want to reset the game?" buttons={["OK", "Cancel"]} handleButtonClick={game.handleResetConfirm} />}
+      {game.dialog === "solve" && <Dialog message="Are you sure you want to see the solution?" buttons={["OK", "Cancel"]} handleButtonClick={game.handleSolveConfirm} />}
+      {game.dialog === "solved" && <Dialog message="Congratulations, you solved it! Congratulations, you solved it! Congratulations, you solved it! Congratulations, you solved it! Congratulations, you solved it! Congratulations, you solved it!" buttons={["OK"]} handleButtonClick={game.handleSolvedConfirm} />}
     </div>
   );
 };

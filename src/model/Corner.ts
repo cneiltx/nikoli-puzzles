@@ -14,6 +14,10 @@ class Corner {
   topRightCell: Cell | null = null;
   bottomLeftCell: Cell | null = null;
   bottomRightCell: Cell | null = null;
+  topLeftEdges: Set<number> = new Set<number>([0, 1, 2]);
+  topRightEdges: Set<number> = new Set<number>([0, 1, 2]);
+  bottomLeftEdges: Set<number> = new Set<number>([0, 1, 2]);
+  bottomRightEdges: Set<number> = new Set<number>([0, 1, 2]);
 
   constructor(row: number, col: number, value: string) {
     this.row = row;

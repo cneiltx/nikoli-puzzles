@@ -2,7 +2,9 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  color: #cabba7;
   font-family: Arial, Helvetica, sans-serif;
+  font-size: 2.5vh;
 }
 
 .app {
@@ -11,132 +13,120 @@
 }
 
 .startPage {
+  padding: 2vh;
   height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 3vh;
 }
 
 .gamePage {
+  padding: 2vh;
   height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 3vh;
+}
+
+.buttonRow {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 5vh;
+}
+
+button {
+  background-color: #2f5732;
+  padding: 1vh 2vh;
+  outline: none;
+  font-weight: bold;
+  transition: all 0.1s ease-in-out;
+}
+
+button:focus {
+  outline: auto;
+}
+
+button:hover {
+  background-color: #0f3712;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 5vh;
+  font-weight: bold;
+  text-align: center;
+}
+
+label {
+  font-weight: bold;
+}
+
+select {
+  background-color: #1f2222;
 }
 
 .game {
   height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 3vh;
 }
 
 .gameBoard {
-  height: 80%;
-  margin: 1vh auto;
+  height: 100%;
+  margin: 0 auto;
   display: grid;
   aspect-ratio: 1 / 1;
 }
 
-.corner {
-  background-color: #cabba7;
-  color: #1f2222;
+.cell {
   display: flex;
-  font-weight: bold;
-  text-align: center;
+  flex-direction: column;
   justify-content: center;
   align-content: center;
-  flex-direction: column;
-}
-
-.edge {
-  font-weight: bold;
-  color: red;
-  display: flex;
   text-align: center;
-  justify-content: center;
-  align-content: center;
-  flex-direction: column;
-}
-
-.edge[data-state="line"] {
-  background-color: #cabba7;
+  font-weight: bold;
 }
 
 .edge:hover {
+  background-color: #4f5252;
   cursor: pointer;
-  background: #4f5252;
   transition: all 0.1s ease-in-out;
 }
 
-.cell {
-  font-weight: bold;
-  color: #cabba7;
-  display: flex;
-  text-align: center;
-  justify-content: center;
-  align-content: center;
-  flex-direction: column;
+.corner {
+  background-color: #cabba7;
 }
 
-.buttonRow {
-  padding: 1vh;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 2vh;
+.dialogBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
-button {
-  color: #cabba7;
-  background-color: #2f5732;
-  padding: 5px 5px;
-  font-size: 1rem;
-  font-weight: bold;
-  transition: all 0.1s ease-in-out;
-}
-
-button:hover {
-  cursor: pointer;
-  background-color: #0f3712;
-}
-
-.title {
-  color: #cabba7;
-  text-align: center;
-  padding: 1vh;
-  font-size: 4vh;
-  font-weight: bold;
-}
-
-.text,
-label {
-  color: #cabba7;
-}
-
-select {
-  color: #cabba7;
+.dialog {
+  padding: 5vh;
   background-color: #1f2222;
-  font-size: 2.5vh;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 30%;
+  max-width: 80%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 5vh;
+  font-weight: bold;
+  border: 1vh solid #0f3712;
 }
 
-.occupied:hover {
-  background: #ff3a3a;
-}
-
-.win {
-  background: #0ff30f;
-}
-
-.win:hover {
-  background: #0ff30f;
-}
-
-.playerWin {
-  color: green;
-}
-
-.computerWin {
-  color: red;
-}
-
-.draw {
-  color: orangered;
+pre {
+  white-space: pre-wrap;
 }

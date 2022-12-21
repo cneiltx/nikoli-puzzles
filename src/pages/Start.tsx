@@ -25,9 +25,9 @@ const Start = (props: IProps) => {
   }
 
   return (
-    <div className="startPage">
-      <div className="title">Game Selection</div>
-      <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
+      <div className="startPage">
+        <div className="title">Game Selection</div>
         <div className="buttonRow">
           <div>
             <label>Game </label>
@@ -44,10 +44,10 @@ const Start = (props: IProps) => {
           </div>
         </div>
         <div className="buttonRow">
-          <button type="submit">Start</button>
+          <button type="submit" autoFocus>Start</button>
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 };
 

@@ -82,6 +82,20 @@ class SlitherlinkBoard {
     });
   }
 
+  reset() {
+    for (const edgeRow of this.hEdges) {
+      for (const edge of edgeRow) {
+        edge.value = "";
+      }
+    }
+
+    for (const edgeRow of this.vEdges) {
+      for (const edge of edgeRow) {
+        edge.value = "";
+      }
+    }
+  }
+
   isSolved() {
     for (const cellRow of this.cells) {
       for (const cell of cellRow) {
@@ -133,6 +147,10 @@ class SlitherlinkBoard {
       curEdge = nextEdge;
       edgeCount++;
     }
+  }
+
+  solve() {
+    this.reset();
   }
 }
 
