@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/nikoli-puzzles/static/css/main.b70a5ea0.css",
+    "main.js": "/nikoli-puzzles/static/js/main.0806a62e.js",
+    "index.html": "/nikoli-puzzles/index.html",
+    "main.b70a5ea0.css.map": "/nikoli-puzzles/static/css/main.b70a5ea0.css.map",
+    "main.0806a62e.js.map": "/nikoli-puzzles/static/js/main.0806a62e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b70a5ea0.css",
+    "static/js/main.0806a62e.js"
+  ]
+}
