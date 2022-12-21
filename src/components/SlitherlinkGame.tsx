@@ -35,25 +35,30 @@ const SlitherlinkGame = (props: IProps) => {
   }
   content.push(<Corner key={"corner-" + rows + "-" + columns} row={rows} col={columns} value="" handleClick={ignoreClick} handleRightClick={ignoreClick} />);
 
+  const boardStyle: Record<string, any> = {
+    gridTemplateColumns: "20fr 100fr ".repeat(columns).concat("20fr"),
+    gridTemplateRows: "20fr 100fr ".repeat(rows).concat("20fr")
+  };
+  if (game.status === "solved" || game.dialog !== "") {
+    boardStyle.pointerEvents = "none";
+  }
+
   return (
     <div className="game">
       <div
         className="gameBoard"
-        style={{
-          gridTemplateColumns: "20fr 100fr ".repeat(columns).concat("20fr"),
-          gridTemplateRows: "20fr 100fr ".repeat(rows).concat("20fr"),
-        }}
+        style={boardStyle}
       >
         {content}
       </div>
       <div className="buttonRow">
         <button onClick={handleNewGame} disabled={game.dialog !== ""}>New Game</button>
         <button onClick={game.handleReset} disabled={game.dialog !== ""}>Reset</button>
-        <button onClick={game.handleSolve} disabled={game.dialog !== ""}>Solve</button>
+        <button onClick={game.handleSolve} disabled={game.dialog !== "" || game.status === "solved"}>Solve</button>
       </div>
       {game.dialog === "reset" && <Dialog message="Are you sure you want to reset the game?" buttons={["OK", "Cancel"]} handleButtonClick={game.handleResetConfirm} />}
       {game.dialog === "solve" && <Dialog message="Are you sure you want to see the solution?" buttons={["OK", "Cancel"]} handleButtonClick={game.handleSolveConfirm} />}
-      {game.dialog === "solved" && <Dialog message="Congratulations, you solved it! Congratulations, you solved it! Congratulations, you solved it! Congratulations, you solved it! Congratulations, you solved it! Congratulations, you solved it!" buttons={["OK"]} handleButtonClick={game.handleSolvedConfirm} />}
+      {game.dialog === "solved" && <Dialog message="Congratulations, you solved it!" buttons={["OK"]} handleButtonClick={game.handleSolvedConfirm} />}
     </div>
   );
 };

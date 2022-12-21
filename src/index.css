@@ -52,6 +52,11 @@ button:hover {
   cursor: pointer;
 }
 
+button:disabled {
+  background-color: #4f5252;
+  cursor: auto;
+}
+
 .title {
   font-size: 5vh;
   font-weight: bold;

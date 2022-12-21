@@ -56,6 +56,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
       let copy = Object.create(board);
       copy.reset();
       setBoard(copy);
+      setStatus("playing");
     }
     setDialog("");
   }
@@ -69,6 +70,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
       let copy = Object.create(board);
       copy.solve();
       setBoard(copy);
+      setStatus("solved");
     }
     setDialog("");
   }
@@ -76,7 +78,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   const checkIfSolved = () => {
     if (board.isSolved()) {
       setDialog("solved");
-      // TODO: set a status?
+      setStatus("solved");
     }
   };
 
