@@ -14,6 +14,11 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
 
+### `npm run deploy`
+
+Builds the app and publishes it to Github Pages.\
+Open [https://cneiltx.github.io/nikoli-puzzles/](https://cneiltx.github.io/nikoli-puzzles/) to view the published app.
+
 ### `npm test`
 
 Launches the test runner in the interactive watch mode.\

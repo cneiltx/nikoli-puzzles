@@ -135,3 +135,22 @@ select {
 pre {
   white-space: pre-wrap;
 }
+
+.quoteBlock {
+  background-color: #4f5252;
+  padding: 2.5vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+  font-weight: normal;
+  font-style: italic;
+  border: 0.25vh solid black;
+}
+
+.quote {
+  text-align: left;
+}
+
+.quoteAuthor {
+  text-align: right;
+}

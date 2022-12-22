@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Nikoli Puzzles",
+  "name": "Nikoli Puzzle Generator and Solver",
   "icons": [
     {
       "src": "favicon.ico",

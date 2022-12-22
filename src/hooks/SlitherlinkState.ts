@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SlitherlinkBoard from "../model/SlitherlinkBoard";
+import { IQuote } from "../components/Dialog";
 
 interface ISlitherlinkState {
   board: SlitherlinkBoard;
   status: string;
   dialog: string;
+  quote: IQuote;
   handleHEdgeClick: (row: number, col: number) => void;
   handleHEdgeRightClick: (row: number, col: number) => void;
   handleVEdgeClick: (row: number, col: number) => void;
@@ -20,6 +22,26 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   const [board, setBoard] = useState(new SlitherlinkBoard(rows, columns));
   const [status, setStatus] = useState("playing");
   const [dialog, setDialog] = useState("");
+  const [quote, setQuote] = useState<IQuote>({ quote: "", author: "" });
+
+  useEffect(() => {
+    if (quote.quote === "") {
+      getQuote();
+    }
+  }, [quote]);
+
+  const getQuote = async () => {
+    try {
+      const response = await fetch("https://api.quotable.io/random");
+      const data = await response.json();
+      setQuote({
+        quote: data.content,
+        author: data.author
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   const handleHEdgeClick = (row: number, col: number) => {
     let copy = Object.create(board);
@@ -76,7 +98,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   }
 
   const checkIfSolved = () => {
-    if (board.isSolved()) {
+    if (true) { //board.isSolved()
       setDialog("solved");
       setStatus("solved");
     }
@@ -90,6 +112,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
     board,
     status,
     dialog,
+    quote,
     handleHEdgeClick,
     handleHEdgeRightClick,
     handleVEdgeClick,
