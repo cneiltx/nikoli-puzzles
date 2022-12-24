@@ -90,7 +90,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   const handleSolveConfirm = (button: string) => {
     if (button === "OK") {
       let copy = Object.create(board);
-      copy.solve();
+      solve(copy);
       setBoard(copy);
       setStatus("solved");
     }
@@ -98,7 +98,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   }
 
   const checkIfSolved = () => {
-    if (true) { //board.isSolved()
+    if (board.isSolved()) {
       setDialog("solved");
       setStatus("solved");
     }
@@ -106,6 +106,15 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
 
   const handleSolvedConfirm = (button: string) => {
     setDialog("");
+  }
+
+  const solve = (board: SlitherlinkBoard) => {
+    board.reset();
+    board.applyOneTimeSolvePass();
+    board.runSolveLoop();
+    board.removeXEdges();
+
+    // TODO: Apply guess backtracking algorithm
   }
 
   return {

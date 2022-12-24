@@ -8,7 +8,14 @@ interface IProps {
 }
 
 const Cell = (props: IProps) => {
-  const { row, col, rows, value = "", handleClick = (row, col) => { }, handleRightClick = (row, col) => { } } = props;
+  const {
+    row,
+    col,
+    rows,
+    value = "",
+    handleClick = (row, col) => { },
+    handleRightClick = (row, col) => { }
+  } = props;
 
   return (
     <div

@@ -18,21 +18,94 @@ const SlitherlinkGame = (props: IProps) => {
 
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < columns; col++) {
-      content.push(<Corner key={`corner-"${row}-${col}`} row={row} col={col} />);
-      content.push(<HEdge key={`hedge-${row}-${col}`} row={row} col={col} value={game.board.hEdges[row][col].value} handleClick={game.handleHEdgeClick} handleRightClick={game.handleHEdgeRightClick} />);
+      content.push(
+        <Corner
+          key={`corner-"${row}-${col}`}
+          row={row}
+          col={col}
+          rows={rows}
+          topLeftValue={Array.from(game.board.corners[row][col].topLeftEdgeCount).join(" ")}
+          topRightValue={Array.from(game.board.corners[row][col].topRightEdgeCount).join(" ")}
+          bottomLeftValue={Array.from(game.board.corners[row][col].bottomLeftEdgeCount).join(" ")}
+          bottomRightValue={Array.from(game.board.corners[row][col].bottomRightEdgeCount).join(" ")}
+          showCornerValues={true}
+        />);
+      content.push(
+        <HEdge
+          key={`hedge-${row}-${col}`}
+          row={row} col={col}
+          value={game.board.hEdges[row][col].value}
+          handleClick={game.handleHEdgeClick}
+          handleRightClick={game.handleHEdgeRightClick} />
+      );
     }
-    content.push(<Corner key={`corner-${row}-${columns}`} row={row} col={columns} />);
+    content.push(
+      <Corner
+        key={`corner-${row}-${columns}`}
+        row={row} col={columns}
+        rows={rows}
+        topLeftValue={Array.from(game.board.corners[row][columns].topLeftEdgeCount).join(" ")}
+        topRightValue={Array.from(game.board.corners[row][columns].topRightEdgeCount).join(" ")}
+        bottomLeftValue={Array.from(game.board.corners[row][columns].bottomLeftEdgeCount).join(" ")}
+        bottomRightValue={Array.from(game.board.corners[row][columns].bottomRightEdgeCount).join(" ")}
+        showCornerValues={true}
+      />);
+
     for (let col = 0; col < columns; col++) {
-      content.push(<VEdge key={`vedge-${row}-${col}`} row={row} col={col} value={game.board.vEdges[row][col].value} handleClick={game.handleVEdgeClick} handleRightClick={game.handleVEdgeRightClick} />);
-      content.push(<Cell key={`cell-${row}-${col}`} row={row} col={col} rows={rows} value={game.board.cells[row][col].value} />);
+      content.push(
+        <VEdge
+          key={`vedge-${row}-${col}`}
+          row={row} col={col}
+          value={game.board.vEdges[row][col].value}
+          handleClick={game.handleVEdgeClick}
+          handleRightClick={game.handleVEdgeRightClick} />
+      );
+      content.push(
+        <Cell key={`cell-${row}-${col}`} row={row} col={col} rows={rows} value={game.board.cells[row][col].value}
+        />
+      );
     }
-    content.push(<VEdge key={`vedge-${row}-${columns}`} row={row} col={columns} value={game.board.vEdges[row][columns].value} handleClick={game.handleVEdgeClick} handleRightClick={game.handleVEdgeRightClick} />);
+    content.push(
+      <VEdge
+        key={`vedge-${row}-${columns}`}
+        row={row} col={columns}
+        value={game.board.vEdges[row][columns].value}
+        handleClick={game.handleVEdgeClick}
+        handleRightClick={game.handleVEdgeRightClick} />
+    );
   }
   for (let col = 0; col < columns; col++) {
-    content.push(<Corner key={`corner-${rows}-${col}`} row={rows} col={col} />);
-    content.push(<HEdge key={`hedge-${rows}-${col}`} row={rows} col={col} value={game.board.hEdges[rows][col].value} handleClick={game.handleHEdgeClick} handleRightClick={game.handleHEdgeRightClick} />);
+    content.push(
+      <Corner
+        key={`corner-${rows}-${col}`}
+        row={rows} col={col}
+        rows={rows}
+        topLeftValue={Array.from(game.board.corners[rows][col].topLeftEdgeCount).join(" ")}
+        topRightValue={Array.from(game.board.corners[rows][col].topRightEdgeCount).join(" ")}
+        bottomLeftValue={Array.from(game.board.corners[rows][col].bottomLeftEdgeCount).join(" ")}
+        bottomRightValue={Array.from(game.board.corners[rows][col].bottomRightEdgeCount).join(" ")}
+        showCornerValues={true}
+      />);
+    content.push(
+      <HEdge
+        key={`hedge-${rows}-${col}`}
+        row={rows} col={col}
+        value={game.board.hEdges[rows][col].value}
+        handleClick={game.handleHEdgeClick}
+        handleRightClick={game.handleHEdgeRightClick} />
+    );
   }
-  content.push(<Corner key={`corner-${rows}-${columns}`} row={rows} col={columns} />);
+  content.push(
+    <Corner
+      key={`corner-${rows}-${columns}`}
+      row={rows} col={columns}
+      rows={rows}
+      topLeftValue={Array.from(game.board.corners[rows][columns].topLeftEdgeCount).join(" ")}
+      topRightValue={Array.from(game.board.corners[rows][columns].topRightEdgeCount).join(" ")}
+      bottomLeftValue={Array.from(game.board.corners[rows][columns].bottomLeftEdgeCount).join(" ")}
+      bottomRightValue={Array.from(game.board.corners[rows][columns].bottomRightEdgeCount).join(" ")}
+      showCornerValues={true}
+    />);
 
   const boardStyle: Record<string, any> = {
     gridTemplateColumns: "20fr 100fr ".repeat(columns).concat("20fr"),
@@ -56,9 +129,12 @@ const SlitherlinkGame = (props: IProps) => {
         <button onClick={game.handleReset} disabled={game.dialog !== ""}>Reset</button>
         <button onClick={game.handleSolve} disabled={game.dialog !== "" || game.status === "solved"}>Solve</button>
       </div>
-      {game.dialog === "reset" && <Dialog message="Are you sure you want to reset the game?" buttons={["OK", "Cancel"]} handleButtonClick={game.handleResetConfirm} />}
-      {game.dialog === "solve" && <Dialog message="Are you sure you want to see the solution?" buttons={["OK", "Cancel"]} handleButtonClick={game.handleSolveConfirm} />}
-      {game.dialog === "solved" && <Dialog message="Congratulations, you solved it!" quote={game.quote} buttons={["OK"]} handleButtonClick={game.handleSolvedConfirm} />}
+      {game.dialog === "reset" &&
+        <Dialog message="Are you sure you want to reset the game?" buttons={["OK", "Cancel"]} handleButtonClick={game.handleResetConfirm} />}
+      {game.dialog === "solve" &&
+        <Dialog message="Are you sure you want to see the solution?" buttons={["OK", "Cancel"]} handleButtonClick={game.handleSolveConfirm} />}
+      {game.dialog === "solved" &&
+        <Dialog message="Congratulations, you solved it!" quote={game.quote} buttons={["OK"]} handleButtonClick={game.handleSolvedConfirm} />}
     </div>
   );
 };

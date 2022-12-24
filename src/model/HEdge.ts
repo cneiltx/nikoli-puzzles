@@ -8,37 +8,41 @@ class HEdge {
   value: string;
   topCell: Cell | null = null;
   bottomCell: Cell | null = null;
-  leftCorner: Corner | null = null;
-  rightCorner: Corner | null = null;
+  leftCorner: Corner;
+  rightCorner: Corner;
 
   constructor(row: number, col: number, value: string) {
+    const tempCorner = new Corner(-1, -1, "temp");
+
     this.row = row;
     this.col = col;
     this.value = value;
+    this.leftCorner = tempCorner;
+    this.rightCorner = tempCorner;
   }
 
   get leftEdge() {
-    return this.leftCorner?.leftEdge;
+    return this.leftCorner.leftEdge;
   }
 
   get rightEdge() {
-    return this.rightCorner?.rightEdge;
+    return this.rightCorner.rightEdge;
   }
 
   get topLeftEdge() {
-    return this.leftCorner?.topEdge;
+    return this.leftCorner.topEdge;
   }
 
   get topRightEdge() {
-    return this.rightCorner?.topEdge;
+    return this.rightCorner.topEdge;
   }
 
   get bottomLeftEdge() {
-    return this.leftCorner?.bottomEdge;
+    return this.leftCorner.bottomEdge;
   }
 
   get bottomRightEdge() {
-    return this.rightCorner?.bottomEdge;
+    return this.rightCorner.bottomEdge;
   }
 
   get leftPath(): HEdge | VEdge | null {
