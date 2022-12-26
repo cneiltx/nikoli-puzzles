@@ -7,6 +7,7 @@ interface ISlitherlinkState {
   status: string;
   dialog: string;
   quote: IQuote;
+  debug: boolean;
   handleHEdgeClick: (row: number, col: number) => void;
   handleHEdgeRightClick: (row: number, col: number) => void;
   handleVEdgeClick: (row: number, col: number) => void;
@@ -19,7 +20,30 @@ interface ISlitherlinkState {
 }
 
 const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
-  const [board, setBoard] = useState(new SlitherlinkBoard(rows, columns));
+  const sevenBySeven = [
+    ["2", "2", "2", "3", "3", "1", ""],
+    ["", "", "0", "2", "", "3", ""],
+    ["", "", "", "", "", "", ""],
+    ["3", "3", "", "", "3", "3", ""],
+    ["", "", "2", "", "2", "", ""],
+    ["3", "", "2", "", "2", "2", ""],
+    ["3", "", "2", "", "", "3", ""]
+  ];
+  const noSolution = [
+    ["1", "1"],
+    ["1", "1"]
+  ];
+  const oneSolution = [
+    ["2", "2"],
+    ["2", "2"]
+  ];
+  const twoSolutions = [
+    ["3", "2"],
+    ["2", "3"]
+  ];
+
+  const debug = true;
+  const [board, setBoard] = useState(new SlitherlinkBoard(twoSolutions, debug));
   const [status, setStatus] = useState("playing");
   const [dialog, setDialog] = useState("");
   const [quote, setQuote] = useState<IQuote>({ quote: "", author: "" });
@@ -44,29 +68,25 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   }
 
   const handleHEdgeClick = (row: number, col: number) => {
-    let copy = Object.create(board);
-    copy.hEdges[row][col].value = (copy.hEdges[row][col].value === "-" ? "" : "-");
-    setBoard(copy);
+    board.hEdges[row][col].value = (board.hEdges[row][col].value === "-" ? "" : "-");
+    setBoard(Object.create(board));
     checkIfSolved();
   };
 
   const handleHEdgeRightClick = (row: number, col: number) => {
-    let copy = Object.create(board);
-    copy.hEdges[row][col].value = (copy.hEdges[row][col].value === "x" ? "" : "x");
-    setBoard(copy);
+    board.hEdges[row][col].value = (board.hEdges[row][col].value === "x" ? "" : "x");
+    setBoard(Object.create(board));
   }
 
   const handleVEdgeClick = (row: number, col: number) => {
-    let copy = Object.create(board);
-    copy.vEdges[row][col].value = (copy.vEdges[row][col].value === "-" ? "" : "-");
-    setBoard(copy);
+    board.vEdges[row][col].value = (board.vEdges[row][col].value === "-" ? "" : "-");
+    setBoard(Object.create(board));
     checkIfSolved();
   };
 
   const handleVEdgeRightClick = (row: number, col: number) => {
-    let copy = Object.create(board);
-    copy.vEdges[row][col].value = (copy.vEdges[row][col].value === "x" ? "" : "x");
-    setBoard(copy);
+    board.vEdges[row][col].value = (board.vEdges[row][col].value === "x" ? "" : "x");
+    setBoard(Object.create(board));
   }
 
   const handleReset = () => {
@@ -75,9 +95,8 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
 
   const handleResetConfirm = (button: string) => {
     if (button === "OK") {
-      let copy = Object.create(board);
-      copy.reset();
-      setBoard(copy);
+      board.reset();
+      setBoard(Object.create(board));
       setStatus("playing");
     }
     setDialog("");
@@ -89,10 +108,18 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
 
   const handleSolveConfirm = (button: string) => {
     if (button === "OK") {
-      let copy = Object.create(board);
-      solve(copy);
-      setBoard(copy);
-      setStatus("solved");
+      const solutions = board.solve();
+
+      if (solutions === 0) {
+        window.alert("No solution found");
+      } else if (solutions > 1) {
+        window.alert("Multiple solutions found");
+      } else {
+        //result.board.removeXEdges();
+        setStatus("solved");
+      }
+
+      setBoard(Object.create(board));
     }
     setDialog("");
   }
@@ -108,20 +135,12 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
     setDialog("");
   }
 
-  const solve = (board: SlitherlinkBoard) => {
-    board.reset();
-    board.applyOneTimeSolvePass();
-    board.runSolveLoop();
-    board.removeXEdges();
-
-    // TODO: Apply guess backtracking algorithm
-  }
-
   return {
     board,
     status,
     dialog,
     quote,
+    debug,
     handleHEdgeClick,
     handleHEdgeRightClick,
     handleVEdgeClick,

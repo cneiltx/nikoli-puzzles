@@ -4,32 +4,31 @@ import HEdge from "./HEdge";
 import VEdge from "./VEdge";
 import IEdgeCount from "./IEdgeCount";
 
+interface IRecursiveSolve {
+  board: SlitherlinkBoard;
+  solutions: number;
+}
+
 class SlitherlinkBoard {
   rows: number;
   columns: number;
+  debug: boolean;
   cells: Cell[][] = [];
   hEdges: HEdge[][] = [];
   vEdges: VEdge[][] = [];
   corners: Corner[][] = [];
 
-  private rawCellValues = [
-    ["2", "2", "2", "3", "3", "1", ""],
-    ["", "", "0", "2", "", "3", ""],
-    ["", "", "", "", "", "", ""],
-    ["3", "3", "", "", "3", "3", ""],
-    ["", "", "2", "", "2", "", ""],
-    ["3", "", "2", "", "2", "2", ""],
-    ["3", "", "2", "", "", "3", ""]
-  ];
+  private prevDebugOutput = "";
 
-  constructor(rows: number, columns: number) {
-    this.rows = rows;
-    this.columns = columns;
-    this.initializeNewBoard();
+  static get maxSolveIterations() {
+    return 100;
   }
 
-  initializeNewBoard() {
-    this.cells = this.rawCellValues.map((cellRow, rowIndex) => cellRow.map((cell, colIndex) => new Cell(rowIndex, colIndex, cell)));
+  constructor(cellValues: string[][], debug: boolean = false) {
+    this.rows = cellValues.length;
+    this.columns = cellValues[0].length;
+    this.debug = debug;
+    this.cells = cellValues.map((cellRow, rowIndex) => cellRow.map((cell, colIndex) => new Cell(rowIndex, colIndex, cell)));
     this.hEdges = Array(this.rows + 1).fill("").map((edgeRow, rowIndex) => Array(this.columns).fill("").map((edge, colIndex) => new HEdge(rowIndex, colIndex, "")));
     this.vEdges = Array(this.rows).fill("").map((edgeRow, rowIndex) => Array(this.columns + 1).fill("").map((edge, colIndex) => new VEdge(rowIndex, colIndex, "")));
     this.corners = Array(this.rows + 1).fill("").map((cornerRow, rowIndex) => Array(this.columns + 1).fill("").map((corner, colIndex) => new Corner(rowIndex, colIndex, "")));
@@ -83,6 +82,302 @@ class SlitherlinkBoard {
           corner.rightEdge.leftCorner = corner;
         }
       });
+    });
+  }
+
+  deepClone(): SlitherlinkBoard {
+    const clone = new SlitherlinkBoard(this.cells.map(cellRow => cellRow.map(cell => cell.value)), this.debug);
+    clone.prevDebugOutput = this.prevDebugOutput;
+
+    clone.hEdges.forEach((edgeRow, rowIndex) => {
+      edgeRow.forEach((edge, colIndex) => {
+        edge.value = this.hEdges[rowIndex][colIndex].value;
+      });
+    });
+    clone.vEdges.forEach((edgeRow, rowIndex) => {
+      edgeRow.forEach((edge, colIndex) => {
+        edge.value = this.vEdges[rowIndex][colIndex].value;
+      });
+    });
+    clone.corners.forEach((cornerRow, rowIndex) => {
+      cornerRow.forEach((corner, colIndex) => {
+        corner.value = this.corners[rowIndex][colIndex].value;
+        this.cloneSet(this.corners[rowIndex][colIndex].topLeftEdgeCount, corner.topLeftEdgeCount);
+        this.cloneSet(this.corners[rowIndex][colIndex].topRightEdgeCount, corner.topRightEdgeCount);
+        this.cloneSet(this.corners[rowIndex][colIndex].bottomLeftEdgeCount, corner.bottomLeftEdgeCount);
+        this.cloneSet(this.corners[rowIndex][colIndex].bottomRightEdgeCount, corner.bottomRightEdgeCount);
+      });
+    });
+
+    return clone;
+  }
+
+  prettyPrint(): string {
+    let output = "";
+    let row1: string;
+    let row2: string;
+    let row3: string;
+    let row4: string;
+
+    this.cells.forEach((cellRow, rowIndex) => {
+      row1 = Array.from(cellRow[0].topLeftCorner.topLeftEdgeCount).join(" ").padStart(5) +
+        (cellRow[0].topCell?.leftEdge.value === "-" ? "|" : " ") +
+        Array.from(cellRow[0].topLeftCorner.topRightEdgeCount).join(" ").padEnd(5);
+      row2 = "     ■";
+      row3 = Array.from(cellRow[0].topLeftCorner.bottomLeftEdgeCount).join(" ").padStart(5) +
+        (cellRow[0].leftEdge.value === "-" ? "|" : " ") +
+        Array.from(cellRow[0].topLeftCorner.bottomRightEdgeCount).join(" ").padEnd(5);
+      row4 = (cellRow[0].leftEdge.value === "-" ? "|" : " ").padStart(6);
+
+      cellRow.forEach((cell, colIndex) => {
+        row1 += Array.from(cell.topRightCorner.topLeftEdgeCount).join(" ").padStart(8) +
+          (cell.topCell?.rightEdge.value === "-" ? "|" : " ") +
+          Array.from(cell.topRightCorner.topRightEdgeCount).join(" ").padEnd(5);
+
+        switch (cell.topEdge.value) {
+          case "":
+            row2 += " ".repeat(13);
+            break;
+          case "-":
+            row2 += "-".repeat(13);
+            break;
+          case "x":
+            row2 += "      X      ";
+            break;
+        }
+
+        row2 += "■";
+        row3 += Array.from(cell.topRightCorner.bottomLeftEdgeCount).join(" ").padStart(8) +
+          (cell.rightEdge.value === "-" ? "|" : " ") +
+          Array.from(cell.topRightCorner.bottomRightEdgeCount).join(" ").padEnd(5);
+        row4 += cell.value.padStart(7).padEnd(13) + (cell.rightEdge.value === "-" ? "|" : " ");
+      });
+
+      output += [row1, row2, row3, row4].join("\n") + "\n";
+    });
+
+    row1 = Array.from(this.cells[this.rows - 1][0].bottomLeftCorner.topLeftEdgeCount).join(" ").padStart(5) +
+      (this.cells[this.rows - 1][0].leftEdge.value === "-" ? "|" : " ") +
+      Array.from(this.cells[this.rows - 1][0].bottomLeftCorner.topRightEdgeCount).join(" ").padEnd(5);
+    row2 = "     ■";
+    row3 = Array.from(this.cells[this.rows - 1][0].bottomLeftCorner.bottomLeftEdgeCount).join(" ").padStart(5) +
+      " " +
+      Array.from(this.cells[this.rows - 1][0].bottomLeftCorner.bottomRightEdgeCount).join(" ").padEnd(5);
+
+    this.cells[this.rows - 1].forEach((cell, colIndex) => {
+      row1 += Array.from(cell.bottomRightCorner.topLeftEdgeCount).join(" ").padStart(8) +
+        (cell.rightEdge.value === "-" ? "|" : " ") +
+        Array.from(cell.bottomRightCorner.topRightEdgeCount).join(" ").padEnd(5);
+
+      switch (cell.bottomEdge.value) {
+        case "":
+          row2 += " ".repeat(13);
+          break;
+        case "-":
+          row2 += "-".repeat(13);
+          break;
+        case "x":
+          row2 += "      X      ";
+          break;
+      }
+
+      row2 += "■";
+      row3 += Array.from(cell.bottomRightCorner.bottomLeftEdgeCount).join(" ").padStart(8) +
+        " " +
+        Array.from(cell.bottomRightCorner.bottomRightEdgeCount).join(" ").padEnd(5);
+    });
+
+    output += [row1, row2, row3].join("\n") + "\n";
+    const diffOutput = this.diff(output, this.prevDebugOutput);
+    this.prevDebugOutput = output;
+    return diffOutput;
+  }
+
+  diff(curr: string, prev: string): string {
+    const diffColor = "\u001b[31m";
+    const normalColor = "\u001b[0m";
+    const deletedChar = "~";
+    let diff = "";
+    let inDiff = false;
+
+    if (prev === "") {
+      return curr;
+    }
+
+    const currLines = curr.split("\n");
+    const prevLines = prev.split("\n");
+
+    for (let lineIndex = 0; lineIndex < currLines.length; lineIndex++) {
+      const currLine = currLines[lineIndex];
+
+      if (lineIndex >= prevLines.length) {
+        if (!inDiff) {
+          diff += diffColor;
+          inDiff = true;
+        }
+
+        diff += currLine + "\n";
+      } else {
+        const prevLine = prevLines[lineIndex];
+
+        for (let charIndex = 0; charIndex < currLine.length; charIndex++) {
+          if (charIndex >= prevLine.length) {
+            if (!inDiff) {
+              diff += diffColor;
+              inDiff = true;
+            }
+
+            diff += currLine[charIndex];
+          } else {
+            if (currLine[charIndex] === prevLine[charIndex]) {
+              if (inDiff) {
+                diff += normalColor;
+                inDiff = false;
+              }
+
+              diff += currLine[charIndex];
+            } else {
+              if (!inDiff) {
+                diff += diffColor;
+                inDiff = true;
+              }
+
+              diff += (currLine[charIndex] === " " ? deletedChar : currLine[charIndex]);
+            }
+          }
+        }
+
+        if (prevLine.length > currLine.length) {
+          if (!inDiff) {
+            diff += diffColor;
+            inDiff = true;
+          }
+
+          diff += deletedChar;
+        }
+
+        diff += "\n";
+      }
+    }
+
+    if (inDiff) {
+      diff += normalColor;
+      inDiff = false;
+    }
+
+    return diff;
+  }
+
+  apply(board: SlitherlinkBoard) {
+    this.rows = board.rows;
+    this.columns = board.columns;
+    this.cells = board.cells;
+    this.hEdges = board.hEdges;
+    this.vEdges = board.vEdges;
+    this.corners = board.corners;
+  }
+
+  solve(): number {
+    this.reset();
+
+    if (this.debug) {
+      console.log("Initial State:\n" + this.prettyPrint());
+    }
+
+    this.applyOneTimeSolvePass();
+
+    if (this.debug) {
+      console.log("After One Time Solve Pass:\n" + this.prettyPrint());
+    }
+
+    const result = this.recursiveSolve(1, SlitherlinkBoard.maxSolveIterations);
+    this.apply(result.board);
+    return result.solutions;
+  }
+
+  recursiveSolve(iteration: number, maxIterations: number): IRecursiveSolve {
+    if (iteration > maxIterations) {
+      return { board: this, solutions: 0 };
+    }
+
+    if (!this.runSolveLoop(maxIterations)) {
+      return { board: this, solutions: 0 };
+    }
+
+    if (this.debug) {
+      console.log(`Recursive Solve Iteration ${iteration}:\n` + this.prettyPrint());
+    }
+
+    if (this.isSolved()) {
+      return { board: this, solutions: 1 };
+    }
+
+    let selectedEdge: HEdge | VEdge | undefined;
+
+    for (const edgeRow of this.hEdges) {
+      for (const edge of edgeRow) {
+        if (edge.value === "") {
+          selectedEdge = edge;
+          break;
+        }
+      }
+
+      if (selectedEdge !== undefined) {
+        break;
+      }
+    }
+
+    if (selectedEdge === undefined) {
+      for (const edgeRow of this.vEdges) {
+        for (const edge of edgeRow) {
+          if (edge.value === "") {
+            selectedEdge = edge;
+            break;
+          }
+        }
+
+        if (selectedEdge !== undefined) {
+          break;
+        }
+      }
+    }
+
+    if (selectedEdge === undefined) {
+      return { board: this, solutions: 0 };
+    } else {
+      // first, try setting the selected edge
+      let clone = this.deepClone();
+      let cloneEdge = (
+        selectedEdge instanceof HEdge ?
+          clone.hEdges[selectedEdge.row][selectedEdge.col] :
+          clone.vEdges[selectedEdge.row][selectedEdge.col]
+      );
+      clone.markEdge(cloneEdge, "-");
+      const setResult = clone.recursiveSolve(iteration + 1, maxIterations);
+
+      // second, try unsetting the selected edge
+      clone = this.deepClone();
+      cloneEdge = (
+        selectedEdge instanceof HEdge ?
+          clone.hEdges[selectedEdge.row][selectedEdge.col] :
+          clone.vEdges[selectedEdge.row][selectedEdge.col]
+      );
+      clone.markEdge(cloneEdge, "x");
+      const unsetResult = clone.recursiveSolve(iteration + 2, maxIterations);
+
+      if (setResult.solutions > 0) {
+        setResult.solutions += unsetResult.solutions;
+        return setResult;
+      } else {
+        return unsetResult;
+      }
+    }
+  }
+
+  cloneSet(source: Set<number>, target: Set<number>) {
+    target.clear();
+    source.forEach(value => {
+      target.add(value);
     });
   }
 
@@ -214,107 +509,44 @@ class SlitherlinkBoard {
     for (const cellRow of this.cells) {
       for (const cell of cellRow) {
         if (cell.value === "3" && cell.rightCell?.value === "3") {
-          this.markEdge(
-            cell.leftEdge,
-            "-",
-            cell.topLeftEdgeCount,
-            cell.bottomLeftEdgeCount,
-            cell.leftEdge.topCorner.bottomLeftEdgeCount,
-            cell.leftEdge.bottomCorner.topLeftEdgeCount
-          );
-          this.markEdge(
-            cell.rightEdge,
-            "-",
-            cell.topRightEdgeCount,
-            cell.bottomRightEdgeCount,
-            cell.rightCell.topLeftEdgeCount,
-            cell.rightCell.bottomLeftEdgeCount
-          );
-          this.markEdge(
-            cell.rightCell.rightEdge,
-            "-",
-            cell.rightCell.topRightEdgeCount,
-            cell.rightCell.bottomRightEdgeCount,
-            cell.rightCell.rightEdge.topCorner.bottomRightEdgeCount,
-            cell.rightCell.rightEdge.bottomCorner.topRightEdgeCount
-          );
+          this.markEdge(cell.leftEdge, "-");
+          this.markEdge(cell.rightEdge, "-");
+          this.markEdge(cell.rightCell.rightEdge, "-");
           if (cell.topCell) {
-            this.markEdge(
-              cell.topCell.rightEdge,
-              "x",
-              cell.topCell.topRightEdgeCount,
-              cell.topCell.bottomRightEdgeCount,
-              cell.topCell.rightEdge.topCorner.bottomRightEdgeCount,
-              cell.topCell.rightEdge.bottomCorner.topRightEdgeCount
-            );
+            this.markEdge(cell.topCell.rightEdge, "x");
           }
           if (cell.bottomCell) {
-            this.markEdge(
-              cell.bottomCell.rightEdge,
-              "x",
-              cell.bottomCell.topRightEdgeCount,
-              cell.bottomCell.bottomRightEdgeCount,
-              cell.bottomCell.rightEdge.topCorner.bottomRightEdgeCount,
-              cell.bottomCell.rightEdge.bottomCorner.topRightEdgeCount
-            );
+            this.markEdge(cell.bottomCell.rightEdge, "x");
           }
         }
 
         if (cell.value === "3" && cell.bottomCell?.value === "3") {
-          this.markEdge(
-            cell.topEdge,
-            "-",
-            cell.topLeftEdgeCount,
-            cell.topRightEdgeCount,
-            cell.topEdge.leftCorner.topRightEdgeCount,
-            cell.topEdge.rightCorner.topLeftEdgeCount
-          );
-          this.markEdge(
-            cell.bottomEdge,
-            "-",
-            cell.bottomLeftEdgeCount,
-            cell.bottomRightEdgeCount,
-            cell.bottomCell.topLeftEdgeCount,
-            cell.bottomCell.topRightEdgeCount
-          );
-          this.markEdge(
-            cell.bottomCell.bottomEdge,
-            "-",
-            cell.bottomCell.bottomLeftEdgeCount,
-            cell.bottomCell.bottomRightEdgeCount,
-            cell.bottomCell.bottomEdge.leftCorner.bottomRightEdgeCount,
-            cell.bottomCell.bottomEdge.rightCorner.bottomLeftEdgeCount
-          );
+          this.markEdge(cell.topEdge, "-");
+          this.markEdge(cell.bottomEdge, "-");
+          this.markEdge(cell.bottomCell.bottomEdge, "-");
           if (cell.leftCell) {
-            this.markEdge(
-              cell.leftCell.bottomEdge,
-              "x",
-              cell.leftCell.bottomLeftEdgeCount,
-              cell.leftCell.bottomRightEdgeCount,
-              cell.leftCell.bottomEdge.leftCorner.bottomRightEdgeCount,
-              cell.leftCell.bottomEdge.rightCorner.bottomLeftEdgeCount
-            );
+            this.markEdge(cell.leftCell.bottomEdge, "x");
           }
           if (cell.rightCell) {
-            this.markEdge(
-              cell.rightCell.bottomEdge,
-              "x",
-              cell.rightCell.bottomLeftEdgeCount,
-              cell.rightCell.bottomRightEdgeCount,
-              cell.rightCell.bottomEdge.leftCorner.bottomRightEdgeCount,
-              cell.rightCell.bottomEdge.rightCorner.bottomLeftEdgeCount
-            );
+            this.markEdge(cell.rightCell.bottomEdge, "x");
           }
         }
       }
     }
   }
 
-  runSolveLoop() {
+  // returns false if the board is not solvable or we exceed maxIterations
+  runSolveLoop(maxIterations: number): boolean {
     let modified = true;
+    let iteration = 0;
 
     while (modified) {
       modified = false;
+      iteration++;
+
+      if (iteration > maxIterations) {
+        return false;
+      }
 
       // apply deductions based on cell value and possible edge counts
       for (const cellRow of this.cells) {
@@ -348,95 +580,84 @@ class SlitherlinkBoard {
           modified ||= this.applyEdgeCountRule(corner, [2], [1, 2], [0, 2]);
           modified ||= this.applyEdgeCountRule(corner, [1, 2], [2]);
           modified ||= this.applyEdgeCountRule(corner, [0, 2], [1], [2]);
+
+          // if any edge counts are empty, we have an unsolvable board
+          if (corner.topLeftEdgeCount.size === 0 ||
+            corner.topRightEdgeCount.size === 0 ||
+            corner.bottomLeftEdgeCount.size === 0 ||
+            corner.bottomRightEdgeCount.size === 0
+          ) {
+            return false;
+          }
         }
       }
 
       // mark excluded and included edges and update adjacent edge counts
       for (const cellRow of this.cells) {
         for (const cell of cellRow) {
-          modified ||= this.updateEdges(
-            cell.topLeftEdgeCount,
-            cell.topEdge,
-            cell.topRightEdgeCount,
-            cell.topEdge.leftCorner.topRightEdgeCount,
-            cell.topEdge.rightCorner.topLeftEdgeCount,
-            cell.leftEdge,
-            cell.bottomLeftEdgeCount,
-            cell.leftEdge.topCorner.bottomLeftEdgeCount,
-            cell.leftEdge.bottomCorner.topLeftEdgeCount,
-          );
-          modified ||= this.updateEdges(
-            cell.topRightEdgeCount,
-            cell.topEdge,
-            cell.topLeftEdgeCount,
-            cell.topEdge.leftCorner.topRightEdgeCount,
-            cell.topEdge.rightCorner.topLeftEdgeCount,
-            cell.rightEdge,
-            cell.bottomRightEdgeCount,
-            cell.rightEdge.topCorner.bottomRightEdgeCount,
-            cell.rightEdge.bottomCorner.topRightEdgeCount
-          );
-          modified ||= this.updateEdges(
-            cell.bottomLeftEdgeCount,
-            cell.bottomEdge,
-            cell.bottomRightEdgeCount,
-            cell.bottomEdge.leftCorner.bottomRightEdgeCount,
-            cell.bottomEdge.rightCorner.bottomLeftEdgeCount,
-            cell.leftEdge,
-            cell.topLeftEdgeCount,
-            cell.leftEdge.topCorner.bottomLeftEdgeCount,
-            cell.leftEdge.bottomCorner.topLeftEdgeCount,
-          );
-          modified ||= this.updateEdges(
-            cell.bottomRightEdgeCount,
-            cell.bottomEdge,
-            cell.bottomLeftEdgeCount,
-            cell.bottomEdge.leftCorner.bottomRightEdgeCount,
-            cell.bottomEdge.rightCorner.bottomLeftEdgeCount,
-            cell.rightEdge,
-            cell.topRightEdgeCount,
-            cell.rightEdge.topCorner.bottomRightEdgeCount,
-            cell.rightEdge.bottomCorner.topRightEdgeCount
-          );
+          modified ||= this.updateEdges(cell, cell.topLeftCorner);
+          modified ||= this.updateEdges(cell, cell.topRightCorner);
+          modified ||= this.updateEdges(cell, cell.bottomLeftCorner);
+          modified ||= this.updateEdges(cell, cell.bottomRightCorner);
         }
       }
+
+      if (this.debug) {
+        // console.log(`After Solve Loop Iteration ${iteration}:\n` + this.prettyPrint());
+      }
     }
+
+    return true;
   }
 
   // returns true if any edge is modified
   updateEdges(
-    cornerCount: Set<number>,
-    adjacentHEdge: HEdge,
-    adjacentHCornerCount: Set<number>,
-    adjacentHCellLeftCornerCount: Set<number>,
-    adjacentHCellRightCornerCount: Set<number>,
-    adjacentVEdge: VEdge,
-    adjacentVCornerCount: Set<number>,
-    adjacentVCellTopCornerCount: Set<number>,
-    adjacentVCellBottomCornerCount: Set<number>
+    cell: Cell,
+    corner: Corner,
   ): boolean {
     let modified = false;
+    let cornerCount: Set<number>;
+    let adjacentHEdge: HEdge;
+    let adjacentVEdge: VEdge;
+
+    if (corner === cell.topLeftCorner) {
+      cornerCount = cell.topLeftEdgeCount;
+      adjacentHEdge = cell.topEdge;
+      adjacentVEdge = cell.leftEdge;
+    } else if (corner === cell.topRightCorner) {
+      cornerCount = cell.topRightEdgeCount;
+      adjacentHEdge = cell.topEdge;
+      adjacentVEdge = cell.rightEdge;
+    } else if (corner === cell.bottomLeftCorner) {
+      cornerCount = cell.bottomLeftEdgeCount;
+      adjacentHEdge = cell.bottomEdge;
+      adjacentVEdge = cell.leftEdge;
+    } else {
+      cornerCount = cell.bottomRightEdgeCount;
+      adjacentHEdge = cell.bottomEdge;
+      adjacentVEdge = cell.rightEdge;
+    }
 
     if (cornerCount.size === 1) {
       if (cornerCount.has(0)) {
-        modified ||= this.markEdge(adjacentHEdge, "x", cornerCount, adjacentHCornerCount, adjacentHCellLeftCornerCount, adjacentHCellRightCornerCount);
-        modified ||= this.markEdge(adjacentVEdge, "x", cornerCount, adjacentVCornerCount, adjacentVCellTopCornerCount, adjacentVCellBottomCornerCount);
+        modified ||= this.markEdge(adjacentHEdge, "x");
+        modified ||= this.markEdge(adjacentVEdge, "x");
       } else if (cornerCount.has(1)) {
         if (adjacentHEdge.value === "-") {
-          modified ||= this.markEdge(adjacentVEdge, "x", cornerCount, adjacentVCornerCount, adjacentVCellTopCornerCount, adjacentVCellBottomCornerCount);
+          modified ||= this.markEdge(adjacentVEdge, "x");
         }
         if (adjacentHEdge.value === "x") {
-          modified ||= this.markEdge(adjacentVEdge, "-", cornerCount, adjacentVCornerCount, adjacentVCellTopCornerCount, adjacentVCellBottomCornerCount);
+          modified ||= this.markEdge(adjacentVEdge, "-");
         }
         if (adjacentVEdge.value === "-") {
-          modified ||= this.markEdge(adjacentHEdge, "x", cornerCount, adjacentHCornerCount, adjacentHCellLeftCornerCount, adjacentHCellRightCornerCount);
+          modified ||= this.markEdge(adjacentHEdge, "x");
         }
         if (adjacentVEdge.value === "x") {
-          modified ||= this.markEdge(adjacentHEdge, "-", cornerCount, adjacentHCornerCount, adjacentHCellLeftCornerCount, adjacentHCellRightCornerCount);
+          modified ||= this.markEdge(adjacentHEdge, "-");
         }
       } else if (cornerCount.has(2)) {
-        modified ||= this.markEdge(adjacentHEdge, "-", cornerCount, adjacentHCornerCount, adjacentHCellLeftCornerCount, adjacentHCellRightCornerCount);
-        modified ||= this.markEdge(adjacentVEdge, "-", cornerCount, adjacentVCornerCount, adjacentVCellTopCornerCount, adjacentVCellBottomCornerCount);
+        modified ||= this.markEdge(adjacentHEdge, "-");
+        modified ||= this.markEdge(adjacentVEdge, "-");
       }
     }
 
@@ -453,37 +674,30 @@ class SlitherlinkBoard {
 
     // handle special case of outer edges
     if (adjacentHEdge.value === "x" && adjacentHEdge.row === 0) {
-      modified ||= adjacentHCellLeftCornerCount.delete(1);
-      modified ||= adjacentHCellRightCornerCount.delete(1);
+      modified ||= adjacentHEdge.leftCorner.topRightEdgeCount.delete(1);
+      modified ||= adjacentHEdge.rightCorner.topLeftEdgeCount.delete(1);
     }
 
     if (adjacentHEdge.value === "x" && adjacentHEdge.row === this.rows) {
-      modified ||= adjacentHCellLeftCornerCount.delete(1);
-      modified ||= adjacentHCellRightCornerCount.delete(1);
+      modified ||= adjacentHEdge.leftCorner.bottomRightEdgeCount.delete(1);
+      modified ||= adjacentHEdge.rightCorner.bottomLeftEdgeCount.delete(1);
     }
 
     if (adjacentVEdge.value === "x" && adjacentVEdge.col === 0) {
-      modified ||= adjacentVCellTopCornerCount.delete(1);
-      modified ||= adjacentVCellBottomCornerCount.delete(1);
+      modified ||= adjacentVEdge.topCorner.bottomLeftEdgeCount.delete(1);
+      modified ||= adjacentVEdge.bottomCorner.topLeftEdgeCount.delete(1);
     }
 
     if (adjacentVEdge.value === "x" && adjacentVEdge.col === this.columns) {
-      modified ||= adjacentVCellTopCornerCount.delete(1);
-      modified ||= adjacentVCellBottomCornerCount.delete(1);
+      modified ||= adjacentVEdge.topCorner.bottomRightEdgeCount.delete(1);
+      modified ||= adjacentVEdge.bottomCorner.topRightEdgeCount.delete(1);
     }
 
     return modified;
   }
 
   // returns true if edge was modified
-  markEdge(
-    edge: HEdge | VEdge,
-    value: string,
-    cornerCount: Set<number>,
-    adjacentCornerCount: Set<number>,
-    adjacentCellCornerCount1: Set<number>,
-    adjacentCellCornerCount2: Set<number>
-  ): boolean {
+  markEdge(edge: HEdge | VEdge, value: string): boolean {
     let modified = false;
 
     if (edge.value !== value) {
@@ -491,15 +705,29 @@ class SlitherlinkBoard {
       edge.value = value;
 
       if (value === "x") {
-        cornerCount.delete(2);
-        adjacentCornerCount.delete(2);
-        adjacentCellCornerCount1.delete(2)
-        adjacentCellCornerCount2.delete(2);
+        if (edge instanceof HEdge) {
+          edge.leftCorner.topRightEdgeCount.delete(2);
+          edge.rightCorner.topLeftEdgeCount.delete(2);
+          edge.leftCorner.bottomRightEdgeCount.delete(2);
+          edge.rightCorner.bottomLeftEdgeCount.delete(2);
+        } else {
+          edge.topCorner.bottomLeftEdgeCount.delete(2);
+          edge.bottomCorner.topLeftEdgeCount.delete(2);
+          edge.topCorner.bottomRightEdgeCount.delete(2);
+          edge.bottomCorner.topRightEdgeCount.delete(2);
+        }
       } else if (value === "-") {
-        cornerCount.delete(0);
-        adjacentCornerCount.delete(0);
-        adjacentCellCornerCount1.delete(0);
-        adjacentCellCornerCount2.delete(0);
+        if (edge instanceof HEdge) {
+          edge.leftCorner.topRightEdgeCount.delete(0);
+          edge.rightCorner.topLeftEdgeCount.delete(0);
+          edge.leftCorner.bottomRightEdgeCount.delete(0);
+          edge.rightCorner.bottomLeftEdgeCount.delete(0);
+        } else {
+          edge.topCorner.bottomLeftEdgeCount.delete(0);
+          edge.bottomCorner.topLeftEdgeCount.delete(0);
+          edge.topCorner.bottomRightEdgeCount.delete(0);
+          edge.bottomCorner.topRightEdgeCount.delete(0);
+        }
       }
     }
 

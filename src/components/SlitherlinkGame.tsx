@@ -16,19 +16,19 @@ const SlitherlinkGame = (props: IProps) => {
   const game = SlitherlinkState(rows, columns);
   const content = [];
 
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < columns; col++) {
+  for (let row = 0; row < game.board.rows; row++) {
+    for (let col = 0; col < game.board.columns; col++) {
       content.push(
         <Corner
           key={`corner-"${row}-${col}`}
           row={row}
           col={col}
-          rows={rows}
+          rows={game.board.rows}
           topLeftValue={Array.from(game.board.corners[row][col].topLeftEdgeCount).join(" ")}
           topRightValue={Array.from(game.board.corners[row][col].topRightEdgeCount).join(" ")}
           bottomLeftValue={Array.from(game.board.corners[row][col].bottomLeftEdgeCount).join(" ")}
           bottomRightValue={Array.from(game.board.corners[row][col].bottomRightEdgeCount).join(" ")}
-          showCornerValues={true}
+          showCornerValues={game.debug}
         />);
       content.push(
         <HEdge
@@ -41,17 +41,17 @@ const SlitherlinkGame = (props: IProps) => {
     }
     content.push(
       <Corner
-        key={`corner-${row}-${columns}`}
-        row={row} col={columns}
-        rows={rows}
-        topLeftValue={Array.from(game.board.corners[row][columns].topLeftEdgeCount).join(" ")}
-        topRightValue={Array.from(game.board.corners[row][columns].topRightEdgeCount).join(" ")}
-        bottomLeftValue={Array.from(game.board.corners[row][columns].bottomLeftEdgeCount).join(" ")}
-        bottomRightValue={Array.from(game.board.corners[row][columns].bottomRightEdgeCount).join(" ")}
-        showCornerValues={true}
+        key={`corner-${row}-${game.board.columns}`}
+        row={row} col={game.board.columns}
+        rows={game.board.rows}
+        topLeftValue={Array.from(game.board.corners[row][game.board.columns].topLeftEdgeCount).join(" ")}
+        topRightValue={Array.from(game.board.corners[row][game.board.columns].topRightEdgeCount).join(" ")}
+        bottomLeftValue={Array.from(game.board.corners[row][game.board.columns].bottomLeftEdgeCount).join(" ")}
+        bottomRightValue={Array.from(game.board.corners[row][game.board.columns].bottomRightEdgeCount).join(" ")}
+        showCornerValues={game.debug}
       />);
 
-    for (let col = 0; col < columns; col++) {
+    for (let col = 0; col < game.board.columns; col++) {
       content.push(
         <VEdge
           key={`vedge-${row}-${col}`}
@@ -61,55 +61,55 @@ const SlitherlinkGame = (props: IProps) => {
           handleRightClick={game.handleVEdgeRightClick} />
       );
       content.push(
-        <Cell key={`cell-${row}-${col}`} row={row} col={col} rows={rows} value={game.board.cells[row][col].value}
+        <Cell key={`cell-${row}-${col}`} row={row} col={col} rows={game.board.rows} value={game.board.cells[row][col].value}
         />
       );
     }
     content.push(
       <VEdge
-        key={`vedge-${row}-${columns}`}
-        row={row} col={columns}
-        value={game.board.vEdges[row][columns].value}
+        key={`vedge-${row}-${game.board.columns}`}
+        row={row} col={game.board.columns}
+        value={game.board.vEdges[row][game.board.columns].value}
         handleClick={game.handleVEdgeClick}
         handleRightClick={game.handleVEdgeRightClick} />
     );
   }
-  for (let col = 0; col < columns; col++) {
+  for (let col = 0; col < game.board.columns; col++) {
     content.push(
       <Corner
-        key={`corner-${rows}-${col}`}
-        row={rows} col={col}
-        rows={rows}
-        topLeftValue={Array.from(game.board.corners[rows][col].topLeftEdgeCount).join(" ")}
-        topRightValue={Array.from(game.board.corners[rows][col].topRightEdgeCount).join(" ")}
-        bottomLeftValue={Array.from(game.board.corners[rows][col].bottomLeftEdgeCount).join(" ")}
-        bottomRightValue={Array.from(game.board.corners[rows][col].bottomRightEdgeCount).join(" ")}
-        showCornerValues={true}
+        key={`corner-${game.board.rows}-${col}`}
+        row={game.board.rows} col={col}
+        rows={game.board.rows}
+        topLeftValue={Array.from(game.board.corners[game.board.rows][col].topLeftEdgeCount).join(" ")}
+        topRightValue={Array.from(game.board.corners[game.board.rows][col].topRightEdgeCount).join(" ")}
+        bottomLeftValue={Array.from(game.board.corners[game.board.rows][col].bottomLeftEdgeCount).join(" ")}
+        bottomRightValue={Array.from(game.board.corners[game.board.rows][col].bottomRightEdgeCount).join(" ")}
+        showCornerValues={game.debug}
       />);
     content.push(
       <HEdge
-        key={`hedge-${rows}-${col}`}
-        row={rows} col={col}
-        value={game.board.hEdges[rows][col].value}
+        key={`hedge-${game.board.rows}-${col}`}
+        row={game.board.rows} col={col}
+        value={game.board.hEdges[game.board.rows][col].value}
         handleClick={game.handleHEdgeClick}
         handleRightClick={game.handleHEdgeRightClick} />
     );
   }
   content.push(
     <Corner
-      key={`corner-${rows}-${columns}`}
-      row={rows} col={columns}
-      rows={rows}
-      topLeftValue={Array.from(game.board.corners[rows][columns].topLeftEdgeCount).join(" ")}
-      topRightValue={Array.from(game.board.corners[rows][columns].topRightEdgeCount).join(" ")}
-      bottomLeftValue={Array.from(game.board.corners[rows][columns].bottomLeftEdgeCount).join(" ")}
-      bottomRightValue={Array.from(game.board.corners[rows][columns].bottomRightEdgeCount).join(" ")}
-      showCornerValues={true}
+      key={`corner-${game.board.rows}-${game.board.columns}`}
+      row={game.board.rows} col={game.board.columns}
+      rows={game.board.rows}
+      topLeftValue={Array.from(game.board.corners[game.board.rows][game.board.columns].topLeftEdgeCount).join(" ")}
+      topRightValue={Array.from(game.board.corners[game.board.rows][game.board.columns].topRightEdgeCount).join(" ")}
+      bottomLeftValue={Array.from(game.board.corners[game.board.rows][game.board.columns].bottomLeftEdgeCount).join(" ")}
+      bottomRightValue={Array.from(game.board.corners[game.board.rows][game.board.columns].bottomRightEdgeCount).join(" ")}
+      showCornerValues={game.debug}
     />);
 
   const boardStyle: Record<string, any> = {
-    gridTemplateColumns: "20fr 100fr ".repeat(columns).concat("20fr"),
-    gridTemplateRows: "20fr 100fr ".repeat(rows).concat("20fr")
+    gridTemplateColumns: "20fr 100fr ".repeat(game.board.columns).concat("20fr"),
+    gridTemplateRows: "20fr 100fr ".repeat(game.board.rows).concat("20fr")
   };
 
   if (game.status === "solved" || game.dialog !== "") {
