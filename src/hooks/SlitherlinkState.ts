@@ -7,7 +7,7 @@ interface ISlitherlinkState {
   status: string;
   dialog: string;
   quote: IQuote;
-  debug: boolean;
+  debugLevel: number;
   handleHEdgeClick: (row: number, col: number) => void;
   handleHEdgeRightClick: (row: number, col: number) => void;
   handleVEdgeClick: (row: number, col: number) => void;
@@ -42,8 +42,8 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
     ["2", "3"]
   ];
 
-  const debug = true;
-  const [board, setBoard] = useState(new SlitherlinkBoard(twoSolutions, debug));
+  const debugLevel = 0;
+  const [board, setBoard] = useState(new SlitherlinkBoard(sevenBySeven, debugLevel));
   const [status, setStatus] = useState("playing");
   const [dialog, setDialog] = useState("");
   const [quote, setQuote] = useState<IQuote>({ quote: "", author: "" });
@@ -140,7 +140,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
     status,
     dialog,
     quote,
-    debug,
+    debugLevel,
     handleHEdgeClick,
     handleHEdgeRightClick,
     handleVEdgeClick,

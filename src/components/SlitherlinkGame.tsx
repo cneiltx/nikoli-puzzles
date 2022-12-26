@@ -28,7 +28,7 @@ const SlitherlinkGame = (props: IProps) => {
           topRightValue={Array.from(game.board.corners[row][col].topRightEdgeCount).join(" ")}
           bottomLeftValue={Array.from(game.board.corners[row][col].bottomLeftEdgeCount).join(" ")}
           bottomRightValue={Array.from(game.board.corners[row][col].bottomRightEdgeCount).join(" ")}
-          showCornerValues={game.debug}
+          showCornerValues={game.debugLevel > 0}
         />);
       content.push(
         <HEdge
@@ -48,7 +48,7 @@ const SlitherlinkGame = (props: IProps) => {
         topRightValue={Array.from(game.board.corners[row][game.board.columns].topRightEdgeCount).join(" ")}
         bottomLeftValue={Array.from(game.board.corners[row][game.board.columns].bottomLeftEdgeCount).join(" ")}
         bottomRightValue={Array.from(game.board.corners[row][game.board.columns].bottomRightEdgeCount).join(" ")}
-        showCornerValues={game.debug}
+        showCornerValues={game.debugLevel > 0}
       />);
 
     for (let col = 0; col < game.board.columns; col++) {
@@ -84,7 +84,7 @@ const SlitherlinkGame = (props: IProps) => {
         topRightValue={Array.from(game.board.corners[game.board.rows][col].topRightEdgeCount).join(" ")}
         bottomLeftValue={Array.from(game.board.corners[game.board.rows][col].bottomLeftEdgeCount).join(" ")}
         bottomRightValue={Array.from(game.board.corners[game.board.rows][col].bottomRightEdgeCount).join(" ")}
-        showCornerValues={game.debug}
+        showCornerValues={game.debugLevel > 0}
       />);
     content.push(
       <HEdge
@@ -104,7 +104,7 @@ const SlitherlinkGame = (props: IProps) => {
       topRightValue={Array.from(game.board.corners[game.board.rows][game.board.columns].topRightEdgeCount).join(" ")}
       bottomLeftValue={Array.from(game.board.corners[game.board.rows][game.board.columns].bottomLeftEdgeCount).join(" ")}
       bottomRightValue={Array.from(game.board.corners[game.board.rows][game.board.columns].bottomRightEdgeCount).join(" ")}
-      showCornerValues={game.debug}
+      showCornerValues={game.debugLevel > 0}
     />);
 
   const boardStyle: Record<string, any> = {

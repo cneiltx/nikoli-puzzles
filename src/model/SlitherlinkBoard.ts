@@ -12,7 +12,7 @@ interface IRecursiveSolve {
 class SlitherlinkBoard {
   rows: number;
   columns: number;
-  debug: boolean;
+  debugLevel: number;
   cells: Cell[][] = [];
   hEdges: HEdge[][] = [];
   vEdges: VEdge[][] = [];
@@ -20,14 +20,23 @@ class SlitherlinkBoard {
 
   private prevDebugOutput = "";
 
-  static get maxSolveIterations() {
-    return 100;
-  }
-
-  constructor(cellValues: string[][], debug: boolean = false) {
+  constructor(cellValues: string[][], debugLevel: number = 0) {
     this.rows = cellValues.length;
     this.columns = cellValues[0].length;
-    this.debug = debug;
+
+    for (const cellRow of cellValues) {
+      if (cellRow.length !== this.columns) {
+        throw new Error("Cell value rows do not have the same length.");
+      }
+
+      for (const value of cellRow) {
+        if (value !== "" && value !== "0" && value !== "1" && value !== "2" && value !== "3") {
+          throw new Error(`Invalid cell value '${value}'.`);
+        }
+      }
+    }
+
+    this.debugLevel = debugLevel;
     this.cells = cellValues.map((cellRow, rowIndex) => cellRow.map((cell, colIndex) => new Cell(rowIndex, colIndex, cell)));
     this.hEdges = Array(this.rows + 1).fill("").map((edgeRow, rowIndex) => Array(this.columns).fill("").map((edge, colIndex) => new HEdge(rowIndex, colIndex, "")));
     this.vEdges = Array(this.rows).fill("").map((edgeRow, rowIndex) => Array(this.columns + 1).fill("").map((edge, colIndex) => new VEdge(rowIndex, colIndex, "")));
@@ -86,7 +95,7 @@ class SlitherlinkBoard {
   }
 
   deepClone(): SlitherlinkBoard {
-    const clone = new SlitherlinkBoard(this.cells.map(cellRow => cellRow.map(cell => cell.value)), this.debug);
+    const clone = new SlitherlinkBoard(this.cells.map(cellRow => cellRow.map(cell => cell.value)), this.debugLevel);
     clone.prevDebugOutput = this.prevDebugOutput;
 
     clone.hEdges.forEach((edgeRow, rowIndex) => {
@@ -127,7 +136,18 @@ class SlitherlinkBoard {
       row3 = Array.from(cellRow[0].topLeftCorner.bottomLeftEdgeCount).join(" ").padStart(5) +
         (cellRow[0].leftEdge.value === "-" ? "|" : " ") +
         Array.from(cellRow[0].topLeftCorner.bottomRightEdgeCount).join(" ").padEnd(5);
-      row4 = (cellRow[0].leftEdge.value === "-" ? "|" : " ").padStart(6);
+
+      switch (cellRow[0].leftEdge.value) {
+        case "":
+          row4 = " ".repeat(6);
+          break;
+        case "-":
+          row4 = "|".padStart(6);
+          break;
+        case "x":
+          row4 = "X".padStart(6);
+          break;
+      }
 
       cellRow.forEach((cell, colIndex) => {
         row1 += Array.from(cell.topRightCorner.topLeftEdgeCount).join(" ").padStart(8) +
@@ -150,7 +170,19 @@ class SlitherlinkBoard {
         row3 += Array.from(cell.topRightCorner.bottomLeftEdgeCount).join(" ").padStart(8) +
           (cell.rightEdge.value === "-" ? "|" : " ") +
           Array.from(cell.topRightCorner.bottomRightEdgeCount).join(" ").padEnd(5);
-        row4 += cell.value.padStart(7).padEnd(13) + (cell.rightEdge.value === "-" ? "|" : " ");
+        row4 += cell.value.padStart(7).padEnd(13)
+
+        switch (cell.rightEdge.value) {
+          case "":
+            row4 += " ";
+            break;
+          case "-":
+            row4 += "|";
+            break;
+          case "x":
+            row4 += "X";
+            break;
+        }
       });
 
       output += [row1, row2, row3, row4].join("\n") + "\n";
@@ -271,6 +303,7 @@ class SlitherlinkBoard {
   apply(board: SlitherlinkBoard) {
     this.rows = board.rows;
     this.columns = board.columns;
+    this.debugLevel = board.debugLevel;
     this.cells = board.cells;
     this.hEdges = board.hEdges;
     this.vEdges = board.vEdges;
@@ -280,35 +313,50 @@ class SlitherlinkBoard {
   solve(): number {
     this.reset();
 
-    if (this.debug) {
-      console.log("Initial State:\n" + this.prettyPrint());
+    if (this.debugLevel > 1) {
+      console.log("Initial state:\n" + this.prettyPrint());
     }
 
     this.applyOneTimeSolvePass();
 
-    if (this.debug) {
-      console.log("After One Time Solve Pass:\n" + this.prettyPrint());
+    if (this.debugLevel > 1) {
+      console.log("After one time solve pass:\n" + this.prettyPrint());
     }
 
-    const result = this.recursiveSolve(1, SlitherlinkBoard.maxSolveIterations);
+    const result = this.recursiveSolve(0);
     this.apply(result.board);
     return result.solutions;
   }
 
-  recursiveSolve(iteration: number, maxIterations: number): IRecursiveSolve {
-    if (iteration > maxIterations) {
+  recursiveSolve(depth: number): IRecursiveSolve {
+    const maxDepth = (this.rows + 1) * (this.columns + 1);
+
+    if (depth > maxDepth) {
+      if (this.debugLevel > 0) {
+        console.log(`Exceeded max recursion depth of ${maxDepth}`);
+      }
       return { board: this, solutions: 0 };
     }
 
-    if (!this.runSolveLoop(maxIterations)) {
-      return { board: this, solutions: 0 };
+    const solvable = this.runSolveLoop();
+
+    if (this.debugLevel > 1) {
+      console.log(`Recursive solve depth ${depth}:\n` + this.prettyPrint());
+    } else if (this.debugLevel > 0) {
+      console.log(`Recursive solve depth ${depth}`);
     }
 
-    if (this.debug) {
-      console.log(`Recursive Solve Iteration ${iteration}:\n` + this.prettyPrint());
+    if (!solvable) {
+      if (this.debugLevel > 0) {
+        console.log("Solve loop reached an unsolvable state");
+      }
+      return { board: this, solutions: 0 };
     }
 
     if (this.isSolved()) {
+      if (this.debugLevel > 0) {
+        console.log("Solution found by solve loop");
+      }
       return { board: this, solutions: 1 };
     }
 
@@ -343,6 +391,10 @@ class SlitherlinkBoard {
     }
 
     if (selectedEdge === undefined) {
+      if (this.debugLevel > 0) {
+        console.log("No unset edges found");
+      }
+
       return { board: this, solutions: 0 };
     } else {
       // first, try setting the selected edge
@@ -353,7 +405,12 @@ class SlitherlinkBoard {
           clone.vEdges[selectedEdge.row][selectedEdge.col]
       );
       clone.markEdge(cloneEdge, "-");
-      const setResult = clone.recursiveSolve(iteration + 1, maxIterations);
+
+      if (this.debugLevel > 0) {
+        console.log("Recursing with included edge");
+      }
+
+      const setResult = clone.recursiveSolve(depth + 1);
 
       // second, try unsetting the selected edge
       clone = this.deepClone();
@@ -363,7 +420,12 @@ class SlitherlinkBoard {
           clone.vEdges[selectedEdge.row][selectedEdge.col]
       );
       clone.markEdge(cloneEdge, "x");
-      const unsetResult = clone.recursiveSolve(iteration + 2, maxIterations);
+
+      if (this.debugLevel > 0) {
+        console.log("Recursing with excluded edge");
+      }
+
+      const unsetResult = clone.recursiveSolve(depth + 1);
 
       if (setResult.solutions > 0) {
         setResult.solutions += unsetResult.solutions;
@@ -505,7 +567,20 @@ class SlitherlinkBoard {
     this.corners[this.rows][0].bottomLeftEdgeCount.delete(1);
     this.corners[this.rows][this.columns].bottomRightEdgeCount.delete(1);
 
-    // handle special case of adjacent 3 cells
+    // special case of adjacent 1 cells on outer edge
+    for (const cellRow of this.cells) {
+      for (const cell of cellRow) {
+        if ((cell.row === 0 || cell.row === this.rows - 1) && cell.value === "1" && cell.rightCell?.value === "1") {
+          this.markEdge(cell.rightEdge, "x");
+        }
+
+        if ((cell.col === 0 || cell.col === this.columns - 1) && cell.value === "1" && cell.bottomCell?.value === "1") {
+          this.markEdge(cell.bottomEdge, "x");
+        }
+      }
+    }
+
+    // special case of adjacent 3 cells
     for (const cellRow of this.cells) {
       for (const cell of cellRow) {
         if (cell.value === "3" && cell.rightCell?.value === "3") {
@@ -536,15 +611,19 @@ class SlitherlinkBoard {
   }
 
   // returns false if the board is not solvable or we exceed maxIterations
-  runSolveLoop(maxIterations: number): boolean {
+  runSolveLoop(): boolean {
     let modified = true;
     let iteration = 0;
+    const maxIterations = ((this.rows + 1) * (this.columns + 1)) ** 2;
 
     while (modified) {
       modified = false;
       iteration++;
 
       if (iteration > maxIterations) {
+        if (this.debugLevel > 0) {
+          console.log(`Solve loop exceeded max iterations of ${maxIterations}`);
+        }
         return false;
       }
 
@@ -587,6 +666,9 @@ class SlitherlinkBoard {
             corner.bottomLeftEdgeCount.size === 0 ||
             corner.bottomRightEdgeCount.size === 0
           ) {
+            if (this.debugLevel > 0) {
+              console.log("Unsolvable due to empty edge count");
+            }
             return false;
           }
         }
@@ -602,9 +684,13 @@ class SlitherlinkBoard {
         }
       }
 
-      if (this.debug) {
-        // console.log(`After Solve Loop Iteration ${iteration}:\n` + this.prettyPrint());
+      if (this.debugLevel > 1) {
+        console.log(`After solve loop iteration ${iteration}:\n` + this.prettyPrint());
       }
+    }
+
+    if (this.debugLevel > 0) {
+      console.log(`Solve loop completed after ${iteration} iterations`);
     }
 
     return true;
@@ -619,23 +705,33 @@ class SlitherlinkBoard {
     let cornerCount: Set<number>;
     let adjacentHEdge: HEdge;
     let adjacentVEdge: VEdge;
+    let adjacentHEdgeCornerCount: Set<number>;
+    let adjacentVEdgeCornerCount: Set<number>;
 
     if (corner === cell.topLeftCorner) {
       cornerCount = cell.topLeftEdgeCount;
       adjacentHEdge = cell.topEdge;
       adjacentVEdge = cell.leftEdge;
+      adjacentHEdgeCornerCount = cell.topLeftCorner.topRightEdgeCount;
+      adjacentVEdgeCornerCount = cell.topLeftCorner.bottomLeftEdgeCount;
     } else if (corner === cell.topRightCorner) {
       cornerCount = cell.topRightEdgeCount;
       adjacentHEdge = cell.topEdge;
       adjacentVEdge = cell.rightEdge;
+      adjacentHEdgeCornerCount = cell.topRightCorner.topLeftEdgeCount;
+      adjacentVEdgeCornerCount = cell.topRightCorner.bottomRightEdgeCount;
     } else if (corner === cell.bottomLeftCorner) {
       cornerCount = cell.bottomLeftEdgeCount;
       adjacentHEdge = cell.bottomEdge;
       adjacentVEdge = cell.leftEdge;
+      adjacentHEdgeCornerCount = cell.bottomLeftCorner.bottomRightEdgeCount;
+      adjacentVEdgeCornerCount = cell.bottomLeftCorner.topLeftEdgeCount;
     } else {
       cornerCount = cell.bottomRightEdgeCount;
       adjacentHEdge = cell.bottomEdge;
       adjacentVEdge = cell.rightEdge;
+      adjacentHEdgeCornerCount = cell.bottomRightCorner.bottomLeftEdgeCount;
+      adjacentVEdgeCornerCount = cell.bottomRightCorner.topRightEdgeCount;
     }
 
     if (cornerCount.size === 1) {
@@ -673,24 +769,20 @@ class SlitherlinkBoard {
     }
 
     // handle special case of outer edges
-    if (adjacentHEdge.value === "x" && adjacentHEdge.row === 0) {
-      modified ||= adjacentHEdge.leftCorner.topRightEdgeCount.delete(1);
-      modified ||= adjacentHEdge.rightCorner.topLeftEdgeCount.delete(1);
+    if (adjacentHEdgeCornerCount.size === 1 && (adjacentHEdge.row === 0 || adjacentHEdge.row === this.rows)) {
+      if (adjacentHEdgeCornerCount.has(0)) {
+        modified ||= this.markEdge(adjacentHEdge, "x");
+      } else if (adjacentHEdgeCornerCount.has(1)) {
+        modified ||= this.markEdge(adjacentHEdge, "-");
+      }
     }
 
-    if (adjacentHEdge.value === "x" && adjacentHEdge.row === this.rows) {
-      modified ||= adjacentHEdge.leftCorner.bottomRightEdgeCount.delete(1);
-      modified ||= adjacentHEdge.rightCorner.bottomLeftEdgeCount.delete(1);
-    }
-
-    if (adjacentVEdge.value === "x" && adjacentVEdge.col === 0) {
-      modified ||= adjacentVEdge.topCorner.bottomLeftEdgeCount.delete(1);
-      modified ||= adjacentVEdge.bottomCorner.topLeftEdgeCount.delete(1);
-    }
-
-    if (adjacentVEdge.value === "x" && adjacentVEdge.col === this.columns) {
-      modified ||= adjacentVEdge.topCorner.bottomRightEdgeCount.delete(1);
-      modified ||= adjacentVEdge.bottomCorner.topRightEdgeCount.delete(1);
+    if (adjacentVEdgeCornerCount.size === 1 && (adjacentVEdge.col === 0 || adjacentVEdge.col === this.columns)) {
+      if (adjacentVEdgeCornerCount.has(0)) {
+        modified ||= this.markEdge(adjacentVEdge, "x");
+      } else if (adjacentVEdgeCornerCount.has(1)) {
+        modified ||= this.markEdge(adjacentVEdge, "-");
+      }
     }
 
     return modified;
@@ -710,11 +802,27 @@ class SlitherlinkBoard {
           edge.rightCorner.topLeftEdgeCount.delete(2);
           edge.leftCorner.bottomRightEdgeCount.delete(2);
           edge.rightCorner.bottomLeftEdgeCount.delete(2);
+
+          if (edge.row === 0) {
+            edge.leftCorner.topRightEdgeCount.delete(1);
+            edge.rightCorner.topLeftEdgeCount.delete(1);
+          } else if (edge.row === this.rows) {
+            edge.leftCorner.bottomRightEdgeCount.delete(1);
+            edge.rightCorner.bottomLeftEdgeCount.delete(1);
+          }
         } else {
           edge.topCorner.bottomLeftEdgeCount.delete(2);
           edge.bottomCorner.topLeftEdgeCount.delete(2);
           edge.topCorner.bottomRightEdgeCount.delete(2);
           edge.bottomCorner.topRightEdgeCount.delete(2);
+
+          if (edge.col === 0) {
+            edge.topCorner.bottomLeftEdgeCount.delete(1);
+            edge.bottomCorner.topLeftEdgeCount.delete(1);
+          } else if (edge.col === this.columns) {
+            edge.topCorner.bottomRightEdgeCount.delete(1);
+            edge.bottomCorner.topRightEdgeCount.delete(1);
+          }
         }
       } else if (value === "-") {
         if (edge instanceof HEdge) {
