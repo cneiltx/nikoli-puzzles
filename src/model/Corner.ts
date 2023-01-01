@@ -1,7 +1,7 @@
-import Cell from "./Cell";
-import VEdge from "./VEdge";
-import HEdge from "./HEdge";
-import IEdgeCount from "./IEdgeCount";
+import Cell from './Cell';
+import VEdge from './VEdge';
+import HEdge from './HEdge';
+import IEdgeCount from './IEdgeCount';
 
 class Corner implements IEdgeCount {
   row: number;
@@ -70,19 +70,19 @@ class Corner implements IEdgeCount {
   }
 
   get includedEdges() {
-    return this.edges.filter(edge => edge.value === "-");
+    return this.edges.filter(edge => edge.value === '-');
   }
 
   get excludedEdges() {
-    return this.edges.filter(edge => edge.value === "x");
+    return this.edges.filter(edge => edge.value === 'x');
   }
 
   get nonIncludedEdges() {
-    return this.edges.filter(edge => edge.value !== "-");
+    return this.edges.filter(edge => edge.value !== '-');
   }
 
   get nonExcludedEdges() {
-    return this.edges.filter(edge => edge.value !== "x");
+    return this.edges.filter(edge => edge.value !== 'x');
   }
 }
 

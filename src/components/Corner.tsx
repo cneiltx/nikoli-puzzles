@@ -17,18 +17,18 @@ const Corner = (props: IProps) => {
     row,
     col,
     rows,
-    value = "",
-    topLeftValue = "",
-    topRightValue = "",
-    bottomLeftValue = "",
-    bottomRightValue = "",
+    value = '',
+    topLeftValue = '',
+    topRightValue = '',
+    bottomLeftValue = '',
+    bottomRightValue = '',
     showCornerValues = false,
     handleClick = (row, col) => { }, handleRightClick = (row, col) => { }
   } = props;
 
   return (
     <div
-      className="corner"
+      className='corner'
       onClick={() => handleClick(row, col)}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -37,16 +37,16 @@ const Corner = (props: IProps) => {
       }
     >
       {value}
-      {showCornerValues && topLeftValue && <div className="cornerTopLeft" style={{ fontSize: `${8 / rows}vh` }}>
+      {showCornerValues && topLeftValue && <div className='cornerTopLeft' style={{ fontSize: `${8 / rows}vh` }}>
         {topLeftValue}
       </div>}
-      {showCornerValues && topRightValue && <div className="cornerTopRight" style={{ fontSize: `${8 / rows}vh` }}>
+      {showCornerValues && topRightValue && <div className='cornerTopRight' style={{ fontSize: `${8 / rows}vh` }}>
         {topRightValue}
       </div>}
-      {showCornerValues && bottomLeftValue && <div className="cornerBottomLeft" style={{ fontSize: `${8 / rows}vh` }}>
+      {showCornerValues && bottomLeftValue && <div className='cornerBottomLeft' style={{ fontSize: `${8 / rows}vh` }}>
         {bottomLeftValue}
       </div>}
-      {showCornerValues && bottomRightValue && <div className="cornerBottomRight" style={{ fontSize: `${8 / rows}vh` }}>
+      {showCornerValues && bottomRightValue && <div className='cornerBottomRight' style={{ fontSize: `${8 / rows}vh` }}>
         {bottomRightValue}
       </div>}
     </div>

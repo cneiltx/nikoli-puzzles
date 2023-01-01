@@ -1,6 +1,6 @@
 import Corner from './Corner';
 import VEdge from './VEdge';
-import HEdge from "./HEdge";
+import HEdge from './HEdge';
 import IEdgeCount from './IEdgeCount';
 
 class Cell implements IEdgeCount {
@@ -17,9 +17,9 @@ class Cell implements IEdgeCount {
   bottomRightCorner: Corner;
 
   constructor(row: number, col: number, value: string) {
-    const tempHEdge = new HEdge(-1, -1, "temp");
-    const tempVEdge = new VEdge(-1, -1, "temp");
-    const tempCorner = new Corner(-1, -1, "temp");
+    const tempHEdge = new HEdge(-1, -1, 'temp');
+    const tempVEdge = new VEdge(-1, -1, 'temp');
+    const tempCorner = new Corner(-1, -1, 'temp');
 
     this.row = row;
     this.col = col;
@@ -131,11 +131,11 @@ class Cell implements IEdgeCount {
   }
 
   get edgeCount(): number {
-    return this.edges.filter(edge => edge.value === "-").length;
+    return this.edges.filter(edge => edge.value === '-').length;
   }
 
   get isSatisfied(): boolean {
-    return this.value === "" || this.edgeCount === +this.value;
+    return this.value === '' || this.edgeCount === +this.value;
   }
 }
 

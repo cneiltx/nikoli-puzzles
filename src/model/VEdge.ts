@@ -1,6 +1,6 @@
-import Corner from "./Corner";
-import Cell from "./Cell";
-import HEdge from "./HEdge";
+import Corner from './Corner';
+import Cell from './Cell';
+import HEdge from './HEdge';
 
 class VEdge {
   row: number;
@@ -12,7 +12,7 @@ class VEdge {
   rightCorner: Corner;
 
   constructor(row: number, col: number, value: string) {
-    const tempCorner = new Corner(-1, -1, "temp");
+    const tempCorner = new Corner(-1, -1, 'temp');
 
     this.row = row;
     this.col = col;
@@ -48,15 +48,15 @@ class VEdge {
   get leftPath(): VEdge | HEdge | null {
     let pathCount = 0;
     let path = null;
-    if (this.topLeftEdge?.value === "-") {
+    if (this.topLeftEdge?.value === '-') {
       pathCount++;
       path = this.topLeftEdge;
     }
-    if (this.leftEdge?.value === "-") {
+    if (this.leftEdge?.value === '-') {
       pathCount++;
       path = this.leftEdge;
     }
-    if (this.bottomLeftEdge?.value === "-") {
+    if (this.bottomLeftEdge?.value === '-') {
       pathCount++;
       path = this.bottomLeftEdge;
     }
@@ -67,15 +67,15 @@ class VEdge {
   get rightPath(): VEdge | HEdge | null {
     let pathCount = 0;
     let path = null;
-    if (this.topRightEdge?.value === "-") {
+    if (this.topRightEdge?.value === '-') {
       pathCount++;
       path = this.topRightEdge;
     }
-    if (this.rightEdge?.value === "-") {
+    if (this.rightEdge?.value === '-') {
       pathCount++;
       path = this.rightEdge;
     }
-    if (this.bottomRightEdge?.value === "-") {
+    if (this.bottomRightEdge?.value === '-') {
       pathCount++;
       path = this.bottomRightEdge;
     }

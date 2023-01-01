@@ -12,14 +12,14 @@ const Cell = (props: IProps) => {
     row,
     col,
     rows,
-    value = "",
+    value = '',
     handleClick = (row, col) => { },
     handleRightClick = (row, col) => { }
   } = props;
 
   return (
     <div
-      className="cell"
+      className='cell'
       style={{
         fontSize: `${35 / rows}vh`,
       }}

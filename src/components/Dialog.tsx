@@ -19,20 +19,20 @@ const Dialog = (props: IProps) => {
   });
 
   return (
-    <div className="dialogBackground">
-      <div className="dialog">
+    <div className='dialogBackground'>
+      <div className='dialog'>
         <pre>
           {message}
         </pre>
-        {quote && <div className="quoteBlock">
-          <div className="quote">
+        {quote && <div className='quoteBlock'>
+          <div className='quote'>
             {quote.quote}
           </div>
-          <div className="quoteAuthor">
+          <div className='quoteAuthor'>
             {`\u2013 ${quote.author}`}
           </div>
         </div>}
-        <div className="buttonRow">
+        <div className='buttonRow'>
           {content}
         </div>
       </div>
