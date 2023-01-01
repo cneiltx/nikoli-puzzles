@@ -6,10 +6,10 @@ class VEdge {
   row: number;
   col: number;
   value: string;
-  topCorner: Corner;
-  bottomCorner: Corner;
-  leftCell: Cell | null = null;
-  rightCell: Cell | null = null;
+  topCell: Cell | null = null;
+  bottomCell: Cell | null = null;
+  leftCorner: Corner;
+  rightCorner: Corner;
 
   constructor(row: number, col: number, value: string) {
     const tempCorner = new Corner(-1, -1, "temp");
@@ -17,63 +17,63 @@ class VEdge {
     this.row = row;
     this.col = col;
     this.value = value;
-    this.topCorner = tempCorner;
-    this.bottomCorner = tempCorner;
+    this.leftCorner = tempCorner;
+    this.rightCorner = tempCorner;
   }
 
-  get topEdge() {
-    return this.topCorner.topEdge;
+  get leftEdge() {
+    return this.leftCorner.leftEdge;
   }
 
-  get bottomEdge() {
-    return this.bottomCorner.bottomEdge;
+  get rightEdge() {
+    return this.rightCorner.rightEdge;
   }
 
   get topLeftEdge() {
-    return this.topCorner.leftEdge;
+    return this.leftCorner.topEdge;
   }
 
   get topRightEdge() {
-    return this.topCorner.rightEdge;
+    return this.rightCorner.topEdge;
   }
 
   get bottomLeftEdge() {
-    return this.bottomCorner.leftEdge;
+    return this.leftCorner.bottomEdge;
   }
 
   get bottomRightEdge() {
-    return this.bottomCorner.rightEdge;
+    return this.rightCorner.bottomEdge;
   }
 
-  get topPath(): HEdge | VEdge | null {
+  get leftPath(): VEdge | HEdge | null {
     let pathCount = 0;
     let path = null;
     if (this.topLeftEdge?.value === "-") {
       pathCount++;
       path = this.topLeftEdge;
     }
-    if (this.topEdge?.value === "-") {
+    if (this.leftEdge?.value === "-") {
       pathCount++;
-      path = this.topEdge;
+      path = this.leftEdge;
     }
-    if (this.topRightEdge?.value === "-") {
+    if (this.bottomLeftEdge?.value === "-") {
       pathCount++;
-      path = this.topRightEdge;
+      path = this.bottomLeftEdge;
     }
     if (pathCount !== 1) return null;
     return path;
   }
 
-  get bottomPath(): HEdge | VEdge | null {
+  get rightPath(): VEdge | HEdge | null {
     let pathCount = 0;
     let path = null;
-    if (this.bottomLeftEdge?.value === "-") {
+    if (this.topRightEdge?.value === "-") {
       pathCount++;
-      path = this.bottomLeftEdge;
+      path = this.topRightEdge;
     }
-    if (this.bottomEdge?.value === "-") {
+    if (this.rightEdge?.value === "-") {
       pathCount++;
-      path = this.bottomEdge;
+      path = this.rightEdge;
     }
     if (this.bottomRightEdge?.value === "-") {
       pathCount++;

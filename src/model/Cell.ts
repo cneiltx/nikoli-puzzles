@@ -1,16 +1,16 @@
 import Corner from './Corner';
-import HEdge from './HEdge';
-import VEdge from "./VEdge";
+import VEdge from './VEdge';
+import HEdge from "./HEdge";
 import IEdgeCount from './IEdgeCount';
 
 class Cell implements IEdgeCount {
   row: number;
   col: number;
   value: string;
-  topEdge: HEdge;
-  bottomEdge: HEdge;
-  leftEdge: VEdge;
-  rightEdge: VEdge;
+  topEdge: VEdge;
+  bottomEdge: VEdge;
+  leftEdge: HEdge;
+  rightEdge: HEdge;
   topLeftCorner: Corner;
   topRightCorner: Corner;
   bottomLeftCorner: Corner;
@@ -24,10 +24,10 @@ class Cell implements IEdgeCount {
     this.row = row;
     this.col = col;
     this.value = value;
-    this.topEdge = tempHEdge;
-    this.bottomEdge = tempHEdge;
-    this.leftEdge = tempVEdge;
-    this.rightEdge = tempVEdge;
+    this.topEdge = tempVEdge;
+    this.bottomEdge = tempVEdge;
+    this.leftEdge = tempHEdge;
+    this.rightEdge = tempHEdge;
     this.topLeftCorner = tempCorner;
     this.topRightCorner = tempCorner;
     this.bottomLeftCorner = tempCorner;
@@ -82,17 +82,60 @@ class Cell implements IEdgeCount {
     return this.bottomRightCorner.topLeftEdgeCount;
   }
 
-  edgeCount() {
-    let edgeCount = 0;
-    if (this.topEdge.value === "-") edgeCount++;
-    if (this.bottomEdge.value === "-") edgeCount++;
-    if (this.leftEdge.value === "-") edgeCount++;
-    if (this.rightEdge.value === "-") edgeCount++;
-    return edgeCount;
+  get isCornerCell() {
+    return (this.leftCell === null || this.rightCell === null) && (this.topCell === null || this.bottomCell === null);
   }
 
-  isSatisfied() {
-    return this.value === "" || this.edgeCount() === +this.value;
+  get outerHEdge() {
+    if (this.leftCell === null) {
+      return this.leftEdge;
+    } else if (this.rightCell === null) {
+      return this.rightEdge;
+    } else {
+      return null;
+    }
+  }
+
+  get outerVEdge() {
+    if (this.topCell === null) {
+      return this.topEdge;
+    } else if (this.bottomCell === null) {
+      return this.bottomEdge;
+    } else {
+      return null;
+    }
+  }
+
+  get innerHCell(): Cell | null {
+    if (this.leftCell === null) {
+      return this.rightCell;
+    } else if (this.rightCell === null) {
+      return this.leftCell;
+    } else {
+      return null;
+    }
+  }
+
+  get innerVCell(): Cell | null {
+    if (this.topCell === null) {
+      return this.bottomCell;
+    } else if (this.bottomCell === null) {
+      return this.topCell;
+    } else {
+      return null;
+    }
+  }
+
+  get edges(): (HEdge | VEdge)[] {
+    return [this.topEdge, this.bottomEdge, this.leftEdge, this.rightEdge];
+  }
+
+  get edgeCount(): number {
+    return this.edges.filter(edge => edge.value === "-").length;
+  }
+
+  get isSatisfied(): boolean {
+    return this.value === "" || this.edgeCount === +this.value;
   }
 }
 

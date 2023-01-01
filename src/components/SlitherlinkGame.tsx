@@ -34,7 +34,7 @@ const SlitherlinkGame = (props: IProps) => {
         <HEdge
           key={`hedge-${row}-${col}`}
           row={row} col={col}
-          value={game.board.hEdges[row][col].value}
+          value={game.board.vEdges[row][col].value}
           handleClick={game.handleHEdgeClick}
           handleRightClick={game.handleHEdgeRightClick} />
       );
@@ -56,7 +56,7 @@ const SlitherlinkGame = (props: IProps) => {
         <VEdge
           key={`vedge-${row}-${col}`}
           row={row} col={col}
-          value={game.board.vEdges[row][col].value}
+          value={game.board.hEdges[row][col].value}
           handleClick={game.handleVEdgeClick}
           handleRightClick={game.handleVEdgeRightClick} />
       );
@@ -69,7 +69,7 @@ const SlitherlinkGame = (props: IProps) => {
       <VEdge
         key={`vedge-${row}-${game.board.columns}`}
         row={row} col={game.board.columns}
-        value={game.board.vEdges[row][game.board.columns].value}
+        value={game.board.hEdges[row][game.board.columns].value}
         handleClick={game.handleVEdgeClick}
         handleRightClick={game.handleVEdgeRightClick} />
     );
@@ -90,7 +90,7 @@ const SlitherlinkGame = (props: IProps) => {
       <HEdge
         key={`hedge-${game.board.rows}-${col}`}
         row={game.board.rows} col={col}
-        value={game.board.hEdges[game.board.rows][col].value}
+        value={game.board.vEdges[game.board.rows][col].value}
         handleClick={game.handleHEdgeClick}
         handleRightClick={game.handleHEdgeRightClick} />
     );

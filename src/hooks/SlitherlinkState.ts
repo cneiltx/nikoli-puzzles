@@ -68,24 +68,24 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   }
 
   const handleHEdgeClick = (row: number, col: number) => {
-    board.hEdges[row][col].value = (board.hEdges[row][col].value === "-" ? "" : "-");
-    setBoard(Object.create(board));
-    checkIfSolved();
-  };
-
-  const handleHEdgeRightClick = (row: number, col: number) => {
-    board.hEdges[row][col].value = (board.hEdges[row][col].value === "x" ? "" : "x");
-    setBoard(Object.create(board));
-  }
-
-  const handleVEdgeClick = (row: number, col: number) => {
     board.vEdges[row][col].value = (board.vEdges[row][col].value === "-" ? "" : "-");
     setBoard(Object.create(board));
     checkIfSolved();
   };
 
-  const handleVEdgeRightClick = (row: number, col: number) => {
+  const handleHEdgeRightClick = (row: number, col: number) => {
     board.vEdges[row][col].value = (board.vEdges[row][col].value === "x" ? "" : "x");
+    setBoard(Object.create(board));
+  }
+
+  const handleVEdgeClick = (row: number, col: number) => {
+    board.hEdges[row][col].value = (board.hEdges[row][col].value === "-" ? "" : "-");
+    setBoard(Object.create(board));
+    checkIfSolved();
+  };
+
+  const handleVEdgeRightClick = (row: number, col: number) => {
+    board.hEdges[row][col].value = (board.hEdges[row][col].value === "x" ? "" : "x");
     setBoard(Object.create(board));
   }
 
