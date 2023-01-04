@@ -84,6 +84,10 @@ class Corner implements IEdgeCount {
   get nonExcludedEdges() {
     return this.edges.filter(edge => edge.value !== 'x');
   }
+
+  get unmarkedEdges() {
+    return this.edges.filter(edge => edge.value === '');
+  }
 }
 
 export default Corner;

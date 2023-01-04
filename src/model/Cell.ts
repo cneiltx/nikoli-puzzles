@@ -130,12 +130,20 @@ class Cell implements IEdgeCount {
     return [this.topEdge, this.bottomEdge, this.leftEdge, this.rightEdge];
   }
 
-  get edgeCount(): number {
-    return this.edges.filter(edge => edge.value === '-').length;
+  get includedEdges() {
+    return this.edges.filter(edge => edge.value === '-');
+  }
+
+  get excludedEdges() {
+    return this.edges.filter(edge => edge.value === 'x');
+  }
+
+  get unmarkedEdges() {
+    return this.edges.filter(edge => edge.value === '');
   }
 
   get isSatisfied(): boolean {
-    return this.value === '' || this.edgeCount === +this.value;
+    return this.value === '' || this.includedEdges.length === +this.value;
   }
 }
 

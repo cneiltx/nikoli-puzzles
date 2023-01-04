@@ -43,7 +43,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   ];
 
   const debugLevel = 0;
-  const [board, setBoard] = useState(new SlitherlinkBoard(sevenBySeven, debugLevel));
+  const [board, setBoard] = useState(new SlitherlinkBoard(oneSolution, debugLevel));
   const [status, setStatus] = useState('playing');
   const [dialog, setDialog] = useState('');
   const [quote, setQuote] = useState<IQuote>({ quote: '', author: '' });
@@ -95,7 +95,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
 
   const handleResetConfirm = (button: string) => {
     if (button === 'OK') {
-      board.reset();
+      board.resetBoard();
       setBoard(Object.create(board));
       setStatus('playing');
     }

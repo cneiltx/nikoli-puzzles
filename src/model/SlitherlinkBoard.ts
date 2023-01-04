@@ -318,13 +318,13 @@ class SlitherlinkBoard {
   }
 
   solve(): number {
-    this.reset();
+    this.resetBoard();
 
     if (this.debugLevel > 1) {
       console.log('Initial state:\n' + this.prettyPrint());
     }
 
-    this.applyOneTimeSolvePass();
+    this.applyOneTimeSolvePassEdgeCounts();
 
     if (this.debugLevel > 1) {
       console.log('After one time solve pass:\n' + this.prettyPrint());
@@ -345,7 +345,7 @@ class SlitherlinkBoard {
       return { board: this, solutions: 0 };
     }
 
-    const solvable = this.runSolveLoop();
+    const solvable = this.runSolveLoopEdgeCounts();
 
     if (this.debugLevel > 1) {
       console.log(`Recursive solve depth ${depth}:\n` + this.prettyPrint());
@@ -408,7 +408,7 @@ class SlitherlinkBoard {
       let clone = this.deepClone();
       let cloneEdge = selectedEdge instanceof VEdge ?
         clone.vEdges[selectedEdge.row][selectedEdge.col] : clone.hEdges[selectedEdge.row][selectedEdge.col];
-      clone.markEdge(cloneEdge, '-');
+      clone.markEdgeEdgeCounts(cloneEdge, '-');
 
       if (this.debugLevel > 0) {
         console.log('Recursing with included edge');
@@ -420,7 +420,7 @@ class SlitherlinkBoard {
       clone = this.deepClone();
       cloneEdge = selectedEdge instanceof VEdge ?
         clone.vEdges[selectedEdge.row][selectedEdge.col] : clone.hEdges[selectedEdge.row][selectedEdge.col];
-      clone.markEdge(cloneEdge, 'x');
+      clone.markEdgeEdgeCounts(cloneEdge, 'x');
 
       if (this.debugLevel > 0) {
         console.log('Recursing with excluded edge');
@@ -437,14 +437,7 @@ class SlitherlinkBoard {
     }
   }
 
-  private cloneSet(source: Set<number>, target: Set<number>) {
-    target.clear();
-    source.forEach(value => {
-      target.add(value);
-    });
-  }
-
-  reset() {
+  resetBoard() {
     for (const edgeRow of this.vEdges) {
       for (const edge of edgeRow) {
         edge.value = '';
@@ -458,7 +451,7 @@ class SlitherlinkBoard {
     }
   }
 
-  isSolved() {
+  isSolved(): boolean {
     for (const cellRow of this.cells) {
       for (const cell of cellRow) {
         if (!cell.isSatisfied) return false;
@@ -529,61 +522,61 @@ class SlitherlinkBoard {
   }
 
   // TODO: handle EdgeValueConflictError in caller
-  applyOneTimeSolvePassNoCornerCounts() {
+  runOneTimeSolvePass() {
     for (const cellRow of this.cells) {
       for (const cell of cellRow) {
         // 0 cell
         if (cell.value === '0') {
-          this.markEdgesNoCornerCounts([cell.leftEdge, cell.topEdge, cell.rightEdge, cell.bottomEdge], 'x');
+          this.markEdges([cell.leftEdge, cell.topEdge, cell.rightEdge, cell.bottomEdge], 'x');
         }
 
         if (cell.isCornerCell) {
           switch (cell.value) {
             case '1':
               // corner 1's
-              this.markEdgesNoCornerCounts([cell.outerHEdge, cell.outerVEdge], 'x');
+              this.markEdges([cell.outerHEdge, cell.outerVEdge], 'x');
               break;
             case '2':
               // corner 2's
-              this.markEdgesNoCornerCounts([cell.innerHCell?.outerVEdge, cell.innerVCell?.outerHEdge], '-');
+              this.markEdges([cell.innerHCell?.outerVEdge, cell.innerVCell?.outerHEdge], '-');
               break;
             case '3':
               // corner 3's
-              this.markEdgesNoCornerCounts([cell.outerHEdge, cell.outerVEdge], '-');
+              this.markEdges([cell.outerHEdge, cell.outerVEdge], '-');
               break;
           }
         }
 
         // adjacent 1's on outer edge
         if (cell.value === '1' && cell.outerHEdge && cell.bottomCell?.value === '1') {
-          this.markEdgeNoCornerCounts(cell.bottomEdge, 'x');
+          this.markEdge(cell.bottomEdge, 'x');
         }
 
         if (cell.value === '1' && cell.outerVEdge && cell.rightCell?.value === '1') {
-          this.markEdgeNoCornerCounts(cell.rightEdge, 'x');
+          this.markEdge(cell.rightEdge, 'x');
         }
 
         // adjacent 3's
         if (cell.value === '3' && cell.rightCell?.value === '3') {
-          this.markEdgesNoCornerCounts([cell.leftEdge, cell.rightEdge, cell.rightCell.rightEdge], '-');
-          this.markEdgesNoCornerCounts([cell.topCell?.rightEdge, cell.bottomCell?.rightEdge], 'x');
+          this.markEdges([cell.leftEdge, cell.rightEdge, cell.rightCell.rightEdge], '-');
+          this.markEdges([cell.topCell?.rightEdge, cell.bottomCell?.rightEdge], 'x');
         }
 
         if (cell.value === '3' && cell.bottomCell?.value === '3') {
-          this.markEdgesNoCornerCounts([cell.topEdge, cell.bottomEdge, cell.bottomCell.bottomEdge], '-');
-          this.markEdgesNoCornerCounts([cell.leftCell?.bottomEdge, cell.rightCell?.bottomEdge], 'x');
+          this.markEdges([cell.topEdge, cell.bottomEdge, cell.bottomCell.bottomEdge], '-');
+          this.markEdges([cell.leftCell?.bottomEdge, cell.rightCell?.bottomEdge], 'x');
         }
 
         if (cell.value === '3') {
           // adjacent 3 and 0
           if (cell.leftCell?.value === '0') {
-            this.markEdgesNoCornerCounts([cell.topEdge, cell.rightEdge, cell.bottomEdge, cell.topCell?.leftEdge, cell.bottomCell?.leftEdge], '-');
+            this.markEdges([cell.topEdge, cell.rightEdge, cell.bottomEdge, cell.topCell?.leftEdge, cell.bottomCell?.leftEdge], '-');
           } else if (cell.topCell?.value === '0') {
-            this.markEdgesNoCornerCounts([cell.leftEdge, cell.rightEdge, cell.bottomEdge, cell.leftCell?.topEdge, cell.rightCell?.topEdge], '-');
+            this.markEdges([cell.leftEdge, cell.rightEdge, cell.bottomEdge, cell.leftCell?.topEdge, cell.rightCell?.topEdge], '-');
           } else if (cell.rightCell?.value === '0') {
-            this.markEdgesNoCornerCounts([cell.leftEdge, cell.topEdge, cell.bottomEdge, cell.topCell?.rightEdge, cell.bottomCell?.rightEdge], '-');
+            this.markEdges([cell.leftEdge, cell.topEdge, cell.bottomEdge, cell.topCell?.rightEdge, cell.bottomCell?.rightEdge], '-');
           } else if (cell.bottomCell?.value === '0') {
-            this.markEdgesNoCornerCounts([cell.leftEdge, cell.topEdge, cell.rightEdge, cell.leftCell?.bottomEdge, cell.rightCell?.bottomEdge], '-');
+            this.markEdges([cell.leftEdge, cell.topEdge, cell.rightEdge, cell.leftCell?.bottomEdge, cell.rightCell?.bottomEdge], '-');
           }
 
           // diagonally adjacent 3's separated by 2's
@@ -592,7 +585,7 @@ class SlitherlinkBoard {
             tempCell = tempCell.bottomLeftCell;
           }
           if (tempCell?.value === '3') {
-            this.markEdgesNoCornerCounts([cell.topEdge, cell.rightEdge, tempCell.leftEdge, tempCell.bottomEdge], '-');
+            this.markEdges([cell.topEdge, cell.rightEdge, tempCell.leftEdge, tempCell.bottomEdge], '-');
           }
 
           tempCell = cell.bottomRightCell;
@@ -600,7 +593,7 @@ class SlitherlinkBoard {
             tempCell = tempCell.bottomRightCell;
           }
           if (tempCell?.value === '3') {
-            this.markEdgesNoCornerCounts([cell.leftEdge, cell.topEdge, tempCell.rightEdge, tempCell.bottomEdge], '-');
+            this.markEdges([cell.leftEdge, cell.topEdge, tempCell.rightEdge, tempCell.bottomEdge], '-');
           }
         }
       }
@@ -611,7 +604,7 @@ class SlitherlinkBoard {
     }
   }
 
-  runSolveLoopNoCornerCounts() {
+  runSolveLoop() {
     let modified = true;
     let iteration = 0;
 
@@ -622,205 +615,217 @@ class SlitherlinkBoard {
       for (const cellRow of this.cells) {
         for (const cell of cellRow) {
           if (cell.value === '1') {
+            if (cell.includedEdges.length === 1) {
+              modified = this.markEdges(cell.unmarkedEdges, 'x') || modified;
+            } else if (cell.excludedEdges.length === 3) {
+              modified = this.markEdges(cell.unmarkedEdges, '-') || modified;
+            }
+
             // 1 with incoming line and deleted line away or outer edge
             if ((cell.topLeftCorner.topEdge?.value === '-' && (!cell.topLeftCorner.leftEdge || cell.topLeftCorner.leftEdge.value === 'x')) ||
               (cell.topLeftCorner.leftEdge?.value === '-' && (!cell.topLeftCorner.topEdge || cell.topLeftCorner.topEdge.value === 'x'))
             ) {
-              modified = this.markEdgesNoCornerCounts([cell.rightEdge, cell.bottomEdge], 'x') || modified;
+              modified = this.markEdges([cell.rightEdge, cell.bottomEdge], 'x') || modified;
             }
 
             if ((cell.topRightCorner.topEdge?.value === '-' && (!cell.topRightCorner.rightEdge || cell.topRightCorner.rightEdge.value === 'x')) ||
               (cell.topRightCorner.rightEdge?.value === '-' && (!cell.topRightCorner.topEdge || cell.topRightCorner.topEdge.value === 'x'))
             ) {
-              modified = this.markEdgesNoCornerCounts([cell.leftEdge, cell.bottomEdge], 'x') || modified;
+              modified = this.markEdges([cell.leftEdge, cell.bottomEdge], 'x') || modified;
             }
 
             if ((cell.bottomLeftCorner.bottomEdge?.value === '-' && (!cell.bottomLeftCorner.leftEdge || cell.bottomLeftCorner.leftEdge.value === 'x')) ||
               (cell.bottomLeftCorner.leftEdge?.value === '-' && (!cell.bottomLeftCorner.bottomEdge || cell.bottomLeftCorner.bottomEdge?.value === 'x'))
             ) {
-              modified = this.markEdgesNoCornerCounts([cell.topEdge, cell.rightEdge], 'x') || modified;
+              modified = this.markEdges([cell.topEdge, cell.rightEdge], 'x') || modified;
             }
 
             if ((cell.bottomRightCorner.bottomEdge?.value === '-' && (!cell.bottomRightCorner.rightEdge || cell.bottomRightCorner.rightEdge?.value === 'x')) ||
               (cell.bottomRightCorner.rightEdge?.value === '-' && (!cell.bottomRightCorner.bottomEdge || cell.bottomRightCorner.bottomEdge?.value === 'x'))
             ) {
-              modified = this.markEdgesNoCornerCounts([cell.leftEdge, cell.topEdge], 'x') || modified;
+              modified = this.markEdges([cell.leftEdge, cell.topEdge], 'x') || modified;
             }
 
             // 1 with incoming line and opposite edges deleted
             if (cell.topEdge.value === 'x' && cell.leftEdge.value === 'x') {
               if (cell.bottomRightCorner.bottomEdge?.value === '-') {
-                modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.rightEdge, 'x') || modified;
+                modified = this.markEdge(cell.bottomRightCorner.rightEdge, 'x') || modified;
               } else if (cell.bottomRightCorner.rightEdge?.value === '-') {
-                modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.bottomEdge, 'x') || modified;
+                modified = this.markEdge(cell.bottomRightCorner.bottomEdge, 'x') || modified;
               }
             }
 
             if (cell.topEdge.value === 'x' && cell.rightEdge.value === 'x') {
               if (cell.bottomLeftCorner.bottomEdge?.value === '-') {
-                modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.leftEdge, 'x') || modified;
+                modified = this.markEdge(cell.bottomLeftCorner.leftEdge, 'x') || modified;
               } else if (cell.bottomLeftCorner.leftEdge?.value === '-') {
-                modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.bottomEdge, 'x') || modified;
+                modified = this.markEdge(cell.bottomLeftCorner.bottomEdge, 'x') || modified;
               }
             }
 
             if (cell.bottomEdge.value === 'x' && cell.leftEdge.value === 'x') {
               if (cell.topRightCorner.topEdge?.value === '-') {
-                modified = this.markEdgeNoCornerCounts(cell.topRightCorner.rightEdge, 'x') || modified;
+                modified = this.markEdge(cell.topRightCorner.rightEdge, 'x') || modified;
               } else if (cell.topRightCorner.rightEdge?.value === '-') {
-                modified = this.markEdgeNoCornerCounts(cell.topRightCorner.topEdge, 'x') || modified;
+                modified = this.markEdge(cell.topRightCorner.topEdge, 'x') || modified;
               }
             }
 
             if (cell.bottomEdge.value === 'x' && cell.rightEdge.value === 'x') {
               if (cell.topLeftCorner.topEdge?.value === '-') {
-                modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.leftEdge, 'x') || modified;
+                modified = this.markEdge(cell.topLeftCorner.leftEdge, 'x') || modified;
               } else if (cell.topLeftCorner.leftEdge?.value === '-') {
-                modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.topEdge, 'x') || modified;
+                modified = this.markEdge(cell.topLeftCorner.topEdge, 'x') || modified;
               }
             }
 
             // diagonally adjacent 1's with inner or outer edges deleted
             if (cell.bottomLeftCell?.value === '1') {
               if (cell.bottomEdge.value === 'x' && cell.leftEdge.value === 'x') {
-                modified = this.markEdgesNoCornerCounts([cell.bottomLeftCell.topEdge, cell.bottomLeftCell.rightEdge], 'x') || modified;
+                modified = this.markEdges([cell.bottomLeftCell.topEdge, cell.bottomLeftCell.rightEdge], 'x') || modified;
               } else if (cell.topEdge.value === 'x' && cell.rightEdge.value === 'x') {
-                modified = this.markEdgesNoCornerCounts([cell.bottomLeftCell.bottomEdge, cell.bottomLeftCell.leftEdge], 'x') || modified;
+                modified = this.markEdges([cell.bottomLeftCell.bottomEdge, cell.bottomLeftCell.leftEdge], 'x') || modified;
               }
 
               if (cell.bottomLeftCell.topEdge.value === 'x' && cell.bottomLeftCell.rightEdge.value === 'x') {
-                modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.leftEdge], 'x') || modified;
+                modified = this.markEdges([cell.bottomEdge, cell.leftEdge], 'x') || modified;
               } else if (cell.bottomLeftCell.bottomEdge.value === 'x' && cell.bottomLeftCell.leftEdge.value === 'x') {
-                modified = this.markEdgesNoCornerCounts([cell.topEdge, cell.rightEdge], 'x') || modified;
+                modified = this.markEdges([cell.topEdge, cell.rightEdge], 'x') || modified;
               }
             }
 
             if (cell.bottomRightCell?.value === '1') {
               if (cell.bottomEdge.value === 'x' && cell.rightEdge.value === 'x') {
-                modified = this.markEdgesNoCornerCounts([cell.bottomRightCell.topEdge, cell.bottomRightCell.leftEdge], 'x') || modified;
+                modified = this.markEdges([cell.bottomRightCell.topEdge, cell.bottomRightCell.leftEdge], 'x') || modified;
               } else if (cell.topEdge.value === 'x' && cell.leftEdge.value === 'x') {
-                modified = this.markEdgesNoCornerCounts([cell.bottomRightCell.bottomEdge, cell.bottomRightCell.rightEdge], 'x') || modified;
+                modified = this.markEdges([cell.bottomRightCell.bottomEdge, cell.bottomRightCell.rightEdge], 'x') || modified;
               }
 
               if (cell.bottomRightCell.topEdge.value === 'x' && cell.bottomRightCell.leftEdge.value === 'x') {
-                modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.rightEdge], 'x') || modified;
+                modified = this.markEdges([cell.bottomEdge, cell.rightEdge], 'x') || modified;
               } else if (cell.bottomRightCell.bottomEdge.value === 'x' && cell.bottomRightCell.rightEdge.value === 'x') {
-                modified = this.markEdgesNoCornerCounts([cell.topEdge, cell.leftEdge], 'x') || modified;
+                modified = this.markEdges([cell.topEdge, cell.leftEdge], 'x') || modified;
               }
             }
           } else if (cell.value === '2') {
+            if (cell.includedEdges.length === 2) {
+              modified = this.markEdges(cell.unmarkedEdges, 'x') || modified;
+            } else if (cell.excludedEdges.length === 2) {
+              modified = this.markEdges(cell.unmarkedEdges, '-') || modified;
+            }
+
             // 2 with incoming line and non-adjacent deleted edge
             if (cell.topLeftCorner.leftEdge?.value === '-') {
               if (cell.bottomEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.rightEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.topEdge, 'x') || modified;
+                modified = this.markEdge(cell.rightEdge, '-') || modified;
+                modified = this.markEdge(cell.topLeftCorner.topEdge, 'x') || modified;
               } else if (cell.rightEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.bottomEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.topEdge, 'x') || modified;
+                modified = this.markEdge(cell.bottomEdge, '-') || modified;
+                modified = this.markEdge(cell.topLeftCorner.topEdge, 'x') || modified;
               }
             }
 
             if (cell.topLeftCorner.topEdge?.value === '-') {
               if (cell.bottomEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.rightEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.leftEdge, 'x') || modified;
+                modified = this.markEdge(cell.rightEdge, '-') || modified;
+                modified = this.markEdge(cell.topLeftCorner.leftEdge, 'x') || modified;
               } else if (cell.rightEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.bottomEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.leftEdge, 'x') || modified;
+                modified = this.markEdge(cell.bottomEdge, '-') || modified;
+                modified = this.markEdge(cell.topLeftCorner.leftEdge, 'x') || modified;
               }
             }
 
             if (cell.topRightCorner.rightEdge?.value === '-') {
               if (cell.bottomEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.leftEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.topRightCorner.topEdge, 'x') || modified;
+                modified = this.markEdge(cell.leftEdge, '-') || modified;
+                modified = this.markEdge(cell.topRightCorner.topEdge, 'x') || modified;
               } else if (cell.leftEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.bottomEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.topRightCorner.topEdge, 'x') || modified;
+                modified = this.markEdge(cell.bottomEdge, '-') || modified;
+                modified = this.markEdge(cell.topRightCorner.topEdge, 'x') || modified;
               }
             }
 
             if (cell.topRightCorner.topEdge?.value === '-') {
               if (cell.bottomEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.leftEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.topRightCorner.rightEdge, 'x') || modified;
+                modified = this.markEdge(cell.leftEdge, '-') || modified;
+                modified = this.markEdge(cell.topRightCorner.rightEdge, 'x') || modified;
               } else if (cell.leftEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.bottomEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.topRightCorner.rightEdge, 'x') || modified;
+                modified = this.markEdge(cell.bottomEdge, '-') || modified;
+                modified = this.markEdge(cell.topRightCorner.rightEdge, 'x') || modified;
               }
             }
 
             if (cell.bottomLeftCorner.leftEdge?.value === '-') {
               if (cell.topEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.rightEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.bottomEdge, 'x') || modified;
+                modified = this.markEdge(cell.rightEdge, '-') || modified;
+                modified = this.markEdge(cell.bottomLeftCorner.bottomEdge, 'x') || modified;
               } else if (cell.rightEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.topEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.bottomEdge, 'x') || modified;
+                modified = this.markEdge(cell.topEdge, '-') || modified;
+                modified = this.markEdge(cell.bottomLeftCorner.bottomEdge, 'x') || modified;
               }
             }
 
             if (cell.bottomLeftCorner.bottomEdge?.value === '-') {
               if (cell.topEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.rightEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.leftEdge, 'x') || modified;
+                modified = this.markEdge(cell.rightEdge, '-') || modified;
+                modified = this.markEdge(cell.bottomLeftCorner.leftEdge, 'x') || modified;
               } else if (cell.rightEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.topEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.leftEdge, 'x') || modified;
+                modified = this.markEdge(cell.topEdge, '-') || modified;
+                modified = this.markEdge(cell.bottomLeftCorner.leftEdge, 'x') || modified;
               }
             }
 
             if (cell.bottomRightCorner.rightEdge?.value === '-') {
               if (cell.topEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.leftEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.bottomEdge, 'x') || modified;
+                modified = this.markEdge(cell.leftEdge, '-') || modified;
+                modified = this.markEdge(cell.bottomRightCorner.bottomEdge, 'x') || modified;
               } else if (cell.leftEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.topEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.bottomEdge, 'x') || modified;
+                modified = this.markEdge(cell.topEdge, '-') || modified;
+                modified = this.markEdge(cell.bottomRightCorner.bottomEdge, 'x') || modified;
               }
             }
 
             if (cell.bottomRightCorner.bottomEdge?.value === '-') {
               if (cell.topEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.leftEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.rightEdge, 'x') || modified;
+                modified = this.markEdge(cell.leftEdge, '-') || modified;
+                modified = this.markEdge(cell.bottomRightCorner.rightEdge, 'x') || modified;
               } else if (cell.leftEdge.value === 'x') {
-                modified = this.markEdgeNoCornerCounts(cell.topEdge, '-') || modified;
-                modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.rightEdge, 'x') || modified;
+                modified = this.markEdge(cell.topEdge, '-') || modified;
+                modified = this.markEdge(cell.bottomRightCorner.rightEdge, 'x') || modified;
               }
             }
 
             // 2 with one included edge, deleted adjacent edge, and deleted opposite corner edge
-            if (cell.edgeCount === 1) {
+            if (cell.includedEdges.length === 1) {
               if ((cell.topEdge.value === '-' && cell.leftEdge.value === 'x') || (cell.topEdge.value === 'x' && cell.leftEdge.value === '-')) {
                 if (!cell.bottomRightCorner.bottomEdge || cell.bottomRightCorner.bottomEdge.value === 'x') {
-                  modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.rightEdge, '-') || modified;
+                  modified = this.markEdge(cell.bottomRightCorner.rightEdge, '-') || modified;
                 } else if (!cell.bottomRightCorner.rightEdge || cell.bottomRightCorner.rightEdge?.value === 'x') {
-                  modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.bottomEdge, '-') || modified;
+                  modified = this.markEdge(cell.bottomRightCorner.bottomEdge, '-') || modified;
                 }
               }
 
               if ((cell.topEdge.value === '-' && cell.rightEdge.value === 'x') || (cell.topEdge.value === 'x' && cell.rightEdge.value === '-')) {
                 if (!cell.bottomLeftCorner.bottomEdge || cell.bottomLeftCorner.bottomEdge.value === 'x') {
-                  modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.leftEdge, '-') || modified;
+                  modified = this.markEdge(cell.bottomLeftCorner.leftEdge, '-') || modified;
                 } else if (!cell.bottomLeftCorner.leftEdge || cell.bottomLeftCorner.leftEdge?.value === 'x') {
-                  modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.bottomEdge, '-') || modified;
+                  modified = this.markEdge(cell.bottomLeftCorner.bottomEdge, '-') || modified;
                 }
               }
 
               if ((cell.bottomEdge.value === '-' && cell.leftEdge.value === 'x') || (cell.bottomEdge.value === 'x' && cell.leftEdge.value === '-')) {
                 if (!cell.topRightCorner.topEdge || cell.topRightCorner.topEdge.value === 'x') {
-                  modified = this.markEdgeNoCornerCounts(cell.topRightCorner.rightEdge, '-') || modified;
+                  modified = this.markEdge(cell.topRightCorner.rightEdge, '-') || modified;
                 } else if (!cell.topRightCorner.rightEdge || cell.topRightCorner.rightEdge?.value === 'x') {
-                  modified = this.markEdgeNoCornerCounts(cell.topRightCorner.topEdge, '-') || modified;
+                  modified = this.markEdge(cell.topRightCorner.topEdge, '-') || modified;
                 }
               }
 
               if ((cell.bottomEdge.value === '-' && cell.rightEdge.value === 'x') || (cell.bottomEdge.value === 'x' && cell.rightEdge.value === '-')) {
                 if (!cell.topLeftCorner.topEdge || cell.topLeftCorner.topEdge.value === 'x') {
-                  modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.leftEdge, '-') || modified;
+                  modified = this.markEdge(cell.topLeftCorner.leftEdge, '-') || modified;
                 } else if (!cell.topLeftCorner.leftEdge || cell.topLeftCorner.leftEdge?.value === 'x') {
-                  modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.topEdge, '-') || modified;
+                  modified = this.markEdge(cell.topLeftCorner.topEdge, '-') || modified;
                 }
               }
             }
@@ -828,18 +833,18 @@ class SlitherlinkBoard {
             // diagonally adjacent 2's with angled line at end of series
             // edges will propagate down in this loop but we have to backtrack for the up cases to avoid multiple loop iterations to set them
             if (cell.topLeftCorner.topEdge?.value === '-' && cell.topLeftCorner.leftEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.rightEdge], '-') || modified;
+              modified = this.markEdges([cell.bottomEdge, cell.rightEdge], '-') || modified;
             }
 
             if (cell.topRightCorner.topEdge?.value === '-' && cell.topRightCorner.rightEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.leftEdge], '-') || modified;
+              modified = this.markEdges([cell.bottomEdge, cell.leftEdge], '-') || modified;
             }
 
             if (cell.bottomLeftCorner.bottomEdge?.value === '-' && cell.bottomLeftCorner.leftEdge?.value === '-') {
               let tempCell: Cell | null = cell;
 
               while (tempCell?.value === '2') {
-                modified = this.markEdgesNoCornerCounts([tempCell.topEdge, tempCell.rightEdge], '-') || modified;
+                modified = this.markEdges([tempCell.topEdge, tempCell.rightEdge], '-') || modified;
                 tempCell = tempCell.topRightCell;
               }
             }
@@ -848,84 +853,256 @@ class SlitherlinkBoard {
               let tempCell: Cell | null = cell;
 
               while (tempCell?.value === '2') {
-                modified = this.markEdgesNoCornerCounts([tempCell.topEdge, tempCell.leftEdge], '-') || modified;
+                modified = this.markEdges([tempCell.topEdge, tempCell.leftEdge], '-') || modified;
                 tempCell = tempCell.topLeftCell;
               }
             }
 
             // diagonally adjacent 2's ending with a 3 with incoming line at first 2
-            // TODO
+            if (cell.topLeftCorner.topEdge?.value === '-' || cell.topLeftCorner.leftEdge?.value === '-') {
+              let tempCell: Cell | null = cell;
+
+              while (tempCell?.value === '2') {
+                tempCell = tempCell.bottomRightCell;
+              }
+
+              if (tempCell?.value === '3') {
+                modified = this.markEdges([tempCell.bottomEdge, tempCell.rightEdge], '-') || modified;
+              }
+            }
+
+            if (cell.topRightCorner.topEdge?.value === '-' || cell.topRightCorner.rightEdge?.value === '-') {
+              let tempCell: Cell | null = cell;
+
+              while (tempCell?.value === '2') {
+                tempCell = tempCell.bottomLeftCell;
+              }
+
+              if (tempCell?.value === '3') {
+                modified = this.markEdges([tempCell.bottomEdge, tempCell.leftEdge], '-') || modified;
+              }
+            }
+
+            if (cell.bottomLeftCorner.bottomEdge?.value === '-' || cell.bottomLeftCorner.leftEdge?.value === '-') {
+              let tempCell: Cell | null = cell;
+
+              while (tempCell?.value === '2') {
+                tempCell = tempCell.topRightCell;
+              }
+
+              if (tempCell?.value === '3') {
+                modified = this.markEdges([tempCell.topEdge, tempCell.rightEdge], '-') || modified;
+              }
+            }
+
+            if (cell.bottomRightCorner.bottomEdge?.value === '-' || cell.bottomRightCorner.rightEdge?.value === '-') {
+              let tempCell: Cell | null = cell;
+
+              while (tempCell?.value === '2') {
+                tempCell = tempCell.topLeftCell;
+              }
+
+              if (tempCell?.value === '3') {
+                modified = this.markEdges([tempCell.topEdge, tempCell.leftEdge], '-') || modified;
+              }
+            }
+
+            // diagonally adjacent 2's ending with 1 or 2 with line approaching 2
+            if ((cell.topLeftCorner.topEdge?.value === '-' && (!cell.topLeftCorner.leftEdge || cell.topLeftCorner.leftEdge.value === 'x')) ||
+              (cell.topLeftCorner.leftEdge?.value === '-' && (!cell.topLeftCorner.topEdge || cell.topLeftCorner.topEdge.value === 'x'))
+            ) {
+              let tempCell: Cell | null = cell;
+
+              while (tempCell?.bottomRightCell?.value === '2') {
+                tempCell = tempCell.bottomRightCell;
+              }
+
+              if (tempCell.bottomRightCell?.value === '1') {
+                modified = this.markEdges([tempCell.bottomRightCell.bottomEdge, tempCell.bottomRightCell.rightEdge], 'x') || modified;
+              } else if (!tempCell.bottomRightCorner.rightEdge || tempCell.bottomRightCorner.rightEdge.value === 'x') {
+                modified = this.markEdge(tempCell.bottomRightCorner.bottomEdge, '-') || modified;
+              } else if (!tempCell.bottomRightCorner.bottomEdge || tempCell.bottomRightCorner.bottomEdge.value === 'x') {
+                modified = this.markEdge(tempCell.bottomRightCorner.rightEdge, '-') || modified;
+              } else if (tempCell.bottomRightCorner.rightEdge.value === '-') {
+                modified = this.markEdge(tempCell.bottomRightCorner.bottomEdge, 'x') || modified;
+              } else if (tempCell.bottomRightCorner.bottomEdge.value === '-') {
+                modified = this.markEdge(tempCell.bottomRightCorner.rightEdge, 'x') || modified;
+              }
+            }
+
+            if ((cell.topRightCorner.topEdge?.value === '-' && (!cell.topRightCorner.rightEdge || cell.topRightCorner.rightEdge.value === 'x')) ||
+              (cell.topRightCorner.rightEdge?.value === '-' && (!cell.topRightCorner.topEdge || cell.topRightCorner.topEdge.value === 'x'))
+            ) {
+              let tempCell: Cell | null = cell;
+
+              while (tempCell?.bottomLeftCell?.value === '2') {
+                tempCell = tempCell.bottomLeftCell;
+              }
+
+              if (tempCell.bottomLeftCell?.value === '1') {
+                modified = this.markEdges([tempCell.bottomLeftCell.bottomEdge, tempCell.bottomLeftCell.leftEdge], 'x') || modified;
+              } else if (!tempCell.bottomLeftCorner.leftEdge || tempCell.bottomLeftCorner.leftEdge.value === 'x') {
+                modified = this.markEdge(tempCell.bottomLeftCorner.bottomEdge, '-') || modified;
+              } else if (!tempCell.bottomLeftCorner.bottomEdge || tempCell.bottomLeftCorner.bottomEdge.value === 'x') {
+                modified = this.markEdge(tempCell.bottomLeftCorner.leftEdge, '-') || modified;
+              } else if (tempCell.bottomLeftCorner.leftEdge.value === '-') {
+                modified = this.markEdge(tempCell.bottomLeftCorner.bottomEdge, 'x') || modified;
+              } else if (tempCell.bottomLeftCorner.bottomEdge.value === '-') {
+                modified = this.markEdge(tempCell.bottomLeftCorner.leftEdge, 'x') || modified;
+              }
+            }
+
+            if ((cell.bottomLeftCorner.bottomEdge?.value === '-' && (!cell.bottomLeftCorner.leftEdge || cell.bottomLeftCorner.leftEdge.value === 'x')) ||
+              (cell.bottomLeftCorner.leftEdge?.value === '-' && (!cell.bottomLeftCorner.bottomEdge || cell.bottomLeftCorner.bottomEdge.value === 'x'))
+            ) {
+              let tempCell: Cell | null = cell;
+
+              while (tempCell?.topRightCell?.value === '2') {
+                tempCell = tempCell.topRightCell;
+              }
+
+              if (tempCell.topRightCell?.value === '1') {
+                modified = this.markEdges([tempCell.topRightCell.topEdge, tempCell.topRightCell.rightEdge], 'x') || modified;
+              } else if (!tempCell.topRightCorner.rightEdge || tempCell.topRightCorner.rightEdge.value === 'x') {
+                modified = this.markEdge(tempCell.topRightCorner.topEdge, '-') || modified;
+              } else if (!tempCell.topRightCorner.topEdge || tempCell.topRightCorner.topEdge.value === 'x') {
+                modified = this.markEdge(tempCell.topRightCorner.rightEdge, '-') || modified;
+              } else if (tempCell.topRightCorner.rightEdge.value === '-') {
+                modified = this.markEdge(tempCell.topRightCorner.topEdge, 'x') || modified;
+              } else if (tempCell.topRightCorner.topEdge.value === '-') {
+                modified = this.markEdge(tempCell.topRightCorner.rightEdge, 'x') || modified;
+              }
+            }
+
+            if ((cell.bottomRightCorner.bottomEdge?.value === '-' && (!cell.bottomRightCorner.rightEdge || cell.bottomRightCorner.rightEdge.value === 'x')) ||
+              (cell.bottomRightCorner.rightEdge?.value === '-' && (!cell.bottomRightCorner.bottomEdge || cell.bottomRightCorner.bottomEdge.value === 'x'))
+            ) {
+              let tempCell: Cell | null = cell;
+
+              while (tempCell?.topLeftCell?.value === '2') {
+                tempCell = tempCell.topLeftCell;
+              }
+
+              if (tempCell.topLeftCell?.value === '1') {
+                modified = this.markEdges([tempCell.topLeftCell.topEdge, tempCell.topLeftCell.leftEdge], 'x') || modified;
+              } else if (!tempCell.topLeftCorner.leftEdge || tempCell.topLeftCorner.leftEdge.value === 'x') {
+                modified = this.markEdge(tempCell.topLeftCorner.topEdge, '-') || modified;
+              } else if (!tempCell.topLeftCorner.topEdge || tempCell.topLeftCorner.topEdge.value === 'x') {
+                modified = this.markEdge(tempCell.topLeftCorner.leftEdge, '-') || modified;
+              } else if (tempCell.topLeftCorner.leftEdge.value === '-') {
+                modified = this.markEdge(tempCell.topLeftCorner.topEdge, 'x') || modified;
+              } else if (tempCell.topLeftCorner.topEdge.value === '-') {
+                modified = this.markEdge(tempCell.topLeftCorner.leftEdge, 'x') || modified;
+              }
+            }
           } else if (cell.value === '3') {
+            if (cell.includedEdges.length === 3) {
+              modified = this.markEdges(cell.unmarkedEdges, 'x') || modified;
+            } else if (cell.excludedEdges.length === 1) {
+              modified = this.markEdges(cell.unmarkedEdges, '-') || modified;
+            }
+
             // 3 with two deleted edges exiting a corner
             if ((!cell.topLeftCorner.topEdge || cell.topLeftCorner.topEdge.value === 'x') &&
               (!cell.topLeftCorner.leftEdge || cell.topLeftCorner.leftEdge.value === 'x')
             ) {
-              modified = this.markEdgesNoCornerCounts([cell.topEdge, cell.leftEdge], '-') || modified;
+              modified = this.markEdges([cell.topEdge, cell.leftEdge], '-') || modified;
             }
 
             if ((!cell.topRightCorner.topEdge || cell.topRightCorner.topEdge.value === 'x') &&
               (!cell.topRightCorner.rightEdge || cell.topRightCorner.rightEdge.value === 'x')
             ) {
-              modified = this.markEdgesNoCornerCounts([cell.topEdge, cell.rightEdge], '-') || modified;
+              modified = this.markEdges([cell.topEdge, cell.rightEdge], '-') || modified;
             }
 
             if ((!cell.bottomLeftCorner.bottomEdge || cell.bottomLeftCorner.bottomEdge.value === 'x') &&
               (!cell.bottomLeftCorner.leftEdge || cell.bottomLeftCorner.leftEdge.value === 'x')
             ) {
-              modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.leftEdge], '-') || modified;
+              modified = this.markEdges([cell.bottomEdge, cell.leftEdge], '-') || modified;
             }
 
             if ((!cell.bottomRightCorner.bottomEdge || cell.bottomRightCorner.bottomEdge.value === 'x') &&
               (!cell.bottomRightCorner.rightEdge || cell.bottomRightCorner.rightEdge.value === 'x')
             ) {
-              modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.rightEdge], '-') || modified;
+              modified = this.markEdges([cell.bottomEdge, cell.rightEdge], '-') || modified;
             }
 
             // 3 with incoming line
             if (cell.topLeftCorner.topEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.rightEdge], '-') || modified;
-              modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.leftEdge, 'x') || modified;
+              modified = this.markEdges([cell.bottomEdge, cell.rightEdge], '-') || modified;
+              modified = this.markEdge(cell.topLeftCorner.leftEdge, 'x') || modified;
             }
 
             if (cell.topLeftCorner.leftEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.rightEdge], '-') || modified;
-              modified = this.markEdgeNoCornerCounts(cell.topLeftCorner.topEdge, 'x') || modified;
+              modified = this.markEdges([cell.bottomEdge, cell.rightEdge], '-') || modified;
+              modified = this.markEdge(cell.topLeftCorner.topEdge, 'x') || modified;
             }
 
             if (cell.topRightCorner.topEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.leftEdge], '-') || modified;
-              modified = this.markEdgeNoCornerCounts(cell.topRightCorner.rightEdge, 'x') || modified;
+              modified = this.markEdges([cell.bottomEdge, cell.leftEdge], '-') || modified;
+              modified = this.markEdge(cell.topRightCorner.rightEdge, 'x') || modified;
             }
 
             if (cell.topRightCorner.rightEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.bottomEdge, cell.leftEdge], '-') || modified;
-              modified = this.markEdgeNoCornerCounts(cell.topRightCorner.topEdge, 'x') || modified;
+              modified = this.markEdges([cell.bottomEdge, cell.leftEdge], '-') || modified;
+              modified = this.markEdge(cell.topRightCorner.topEdge, 'x') || modified;
             }
 
             if (cell.bottomLeftCorner.bottomEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.topEdge, cell.rightEdge], '-') || modified;
-              modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.leftEdge, 'x') || modified;
+              modified = this.markEdges([cell.topEdge, cell.rightEdge], '-') || modified;
+              modified = this.markEdge(cell.bottomLeftCorner.leftEdge, 'x') || modified;
             }
 
             if (cell.bottomLeftCorner.leftEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.topEdge, cell.rightEdge], '-') || modified;
-              modified = this.markEdgeNoCornerCounts(cell.bottomLeftCorner.bottomEdge, 'x') || modified;
+              modified = this.markEdges([cell.topEdge, cell.rightEdge], '-') || modified;
+              modified = this.markEdge(cell.bottomLeftCorner.bottomEdge, 'x') || modified;
             }
 
             if (cell.bottomRightCorner.bottomEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.topEdge, cell.leftEdge], '-') || modified;
-              modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.rightEdge, 'x') || modified;
+              modified = this.markEdges([cell.topEdge, cell.leftEdge], '-') || modified;
+              modified = this.markEdge(cell.bottomRightCorner.rightEdge, 'x') || modified;
             }
 
             if (cell.bottomRightCorner.rightEdge?.value === '-') {
-              modified = this.markEdgesNoCornerCounts([cell.topEdge, cell.leftEdge], '-') || modified;
-              modified = this.markEdgeNoCornerCounts(cell.bottomRightCorner.bottomEdge, 'x') || modified;
+              modified = this.markEdges([cell.topEdge, cell.leftEdge], '-') || modified;
+              modified = this.markEdge(cell.bottomRightCorner.bottomEdge, 'x') || modified;
+            }
+
+            // diagonals of 3 and 1
+            if (cell.topLeftCell?.value === '1') {
+              if (cell.topLeftCell.topEdge.value === 'x' && cell.topLeftCell.leftEdge.value === 'x') {
+                modified = this.markEdges([cell.bottomEdge, cell.rightEdge], '-') || modified;
+              } else if (cell.bottomEdge.value === '-' && cell.rightEdge.value === '-') {
+                modified = this.markEdges([cell.topLeftCell.topEdge, cell.topLeftCell.leftEdge], 'x') || modified;
+              }
+            }
+
+            if (cell.topRightCell?.value === '1') {
+              if (cell.topRightCell.topEdge.value === 'x' && cell.topRightCell.rightEdge.value === 'x') {
+                modified = this.markEdges([cell.bottomEdge, cell.leftEdge], '-') || modified;
+              } else if (cell.bottomEdge.value === '-' && cell.leftEdge.value === '-') {
+                modified = this.markEdges([cell.topRightCell.topEdge, cell.topRightCell.rightEdge], 'x') || modified;
+              }
+            }
+
+            if (cell.bottomLeftCell?.value === '1') {
+              if (cell.bottomLeftCell.bottomEdge.value === 'x' && cell.bottomLeftCell.leftEdge.value === 'x') {
+                modified = this.markEdges([cell.topEdge, cell.rightEdge], '-') || modified;
+              } else if (cell.topEdge.value === '-' && cell.rightEdge.value === '-') {
+                modified = this.markEdges([cell.bottomLeftCell.bottomEdge, cell.bottomLeftCell.leftEdge], 'x') || modified;
+              }
+            }
+
+            if (cell.bottomRightCell?.value === '1') {
+              if (cell.bottomRightCell.bottomEdge.value === 'x' && cell.bottomRightCell.rightEdge.value === 'x') {
+                modified = this.markEdges([cell.topEdge, cell.leftEdge], '-') || modified;
+              } else if (cell.topEdge.value === '-' && cell.leftEdge.value === '-') {
+                modified = this.markEdges([cell.bottomRightCell.bottomEdge, cell.bottomRightCell.rightEdge], 'x') || modified;
+              }
             }
           }
         }
       }
-
-      // TODO: satisifed cell values
 
       // every corner must have exactly 0 or 2 connected edges
       for (const cornerRow of this.corners) {
@@ -933,25 +1110,29 @@ class SlitherlinkBoard {
           if (corner.isCornerCorner) {
             // outer corners
             if (corner.excludedEdges.length === 1) {
-              modified = this.markEdgesNoCornerCounts(corner.nonExcludedEdges, 'x') || modified;
+              modified = this.markEdges(corner.nonExcludedEdges, 'x') || modified;
             } else if (corner.includedEdges.length === 1) {
-              modified = this.markEdgesNoCornerCounts(corner.nonIncludedEdges, '-') || modified;
+              modified = this.markEdges(corner.nonIncludedEdges, '-') || modified;
             }
           } else if (corner.isEdgeCorner) {
             // edge corners
             if (corner.excludedEdges.length === 2) {
-              modified = this.markEdgesNoCornerCounts(corner.nonExcludedEdges, 'x') || modified;
+              modified = this.markEdges(corner.nonExcludedEdges, 'x') || modified;
+            } else if (corner.includedEdges.length === 1 && corner.excludedEdges.length === 1) {
+              modified = this.markEdges(corner.unmarkedEdges, '-') || modified;
             }
           } else {
             // inner corners
             if (corner.excludedEdges.length === 3) {
-              modified = this.markEdgesNoCornerCounts(corner.nonExcludedEdges, 'x') || modified;
+              modified = this.markEdges(corner.nonExcludedEdges, 'x') || modified;
+            } else if (corner.includedEdges.length === 1 && corner.excludedEdges.length === 2) {
+              modified = this.markEdges(corner.unmarkedEdges, '-') || modified;
             }
           }
 
           // all corners
           if (corner.includedEdges.length === 2) {
-            modified = this.markEdgesNoCornerCounts(corner.nonIncludedEdges, 'x') || modified;
+            modified = this.markEdges(corner.nonIncludedEdges, 'x') || modified;
           }
         }
       }
@@ -963,18 +1144,18 @@ class SlitherlinkBoard {
   }
 
   // returns true if an edge was modified
-  private markEdgesNoCornerCounts(edges: (VEdge | HEdge | null | undefined)[], value: string): boolean {
+  private markEdges(edges: (VEdge | HEdge | null | undefined)[], value: string): boolean {
     let modified = false;
 
     for (const edge of edges) {
-      modified = this.markEdgeNoCornerCounts(edge, value) || modified;
+      modified = this.markEdge(edge, value) || modified;
     }
 
     return modified;
   }
 
   // returns true if edge was modified
-  private markEdgeNoCornerCounts(edge: VEdge | HEdge | null | undefined, value: string): boolean {
+  private markEdge(edge: VEdge | HEdge | null | undefined, value: string): boolean {
     if (edge) {
       if (edge.value === value) {
         return false;
@@ -989,7 +1170,7 @@ class SlitherlinkBoard {
     }
   }
 
-  applyOneTimeSolvePass() {
+  applyOneTimeSolvePassEdgeCounts() {
     // set cell possible edge counts based on cell values
     for (const cellRow of this.cells) {
       for (const cell of cellRow) {
@@ -1033,11 +1214,11 @@ class SlitherlinkBoard {
     for (const cellRow of this.cells) {
       for (const cell of cellRow) {
         if ((cell.row === 0 || cell.row === this.rows - 1) && cell.value === '1' && cell.rightCell?.value === '1') {
-          this.markEdge(cell.rightEdge, 'x');
+          this.markEdgeEdgeCounts(cell.rightEdge, 'x');
         }
 
         if ((cell.col === 0 || cell.col === this.columns - 1) && cell.value === '1' && cell.bottomCell?.value === '1') {
-          this.markEdge(cell.bottomEdge, 'x');
+          this.markEdgeEdgeCounts(cell.bottomEdge, 'x');
         }
       }
     }
@@ -1046,26 +1227,26 @@ class SlitherlinkBoard {
     for (const cellRow of this.cells) {
       for (const cell of cellRow) {
         if (cell.value === '3' && cell.rightCell?.value === '3') {
-          this.markEdge(cell.leftEdge, '-');
-          this.markEdge(cell.rightEdge, '-');
-          this.markEdge(cell.rightCell.rightEdge, '-');
+          this.markEdgeEdgeCounts(cell.leftEdge, '-');
+          this.markEdgeEdgeCounts(cell.rightEdge, '-');
+          this.markEdgeEdgeCounts(cell.rightCell.rightEdge, '-');
           if (cell.topCell) {
-            this.markEdge(cell.topCell.rightEdge, 'x');
+            this.markEdgeEdgeCounts(cell.topCell.rightEdge, 'x');
           }
           if (cell.bottomCell) {
-            this.markEdge(cell.bottomCell.rightEdge, 'x');
+            this.markEdgeEdgeCounts(cell.bottomCell.rightEdge, 'x');
           }
         }
 
         if (cell.value === '3' && cell.bottomCell?.value === '3') {
-          this.markEdge(cell.topEdge, '-');
-          this.markEdge(cell.bottomEdge, '-');
-          this.markEdge(cell.bottomCell.bottomEdge, '-');
+          this.markEdgeEdgeCounts(cell.topEdge, '-');
+          this.markEdgeEdgeCounts(cell.bottomEdge, '-');
+          this.markEdgeEdgeCounts(cell.bottomCell.bottomEdge, '-');
           if (cell.leftCell) {
-            this.markEdge(cell.leftCell.bottomEdge, 'x');
+            this.markEdgeEdgeCounts(cell.leftCell.bottomEdge, 'x');
           }
           if (cell.rightCell) {
-            this.markEdge(cell.rightCell.bottomEdge, 'x');
+            this.markEdgeEdgeCounts(cell.rightCell.bottomEdge, 'x');
           }
         }
       }
@@ -1077,7 +1258,7 @@ class SlitherlinkBoard {
   }
 
   // returns false if the board is not solvable or we exceed maxIterations
-  runSolveLoop(): boolean {
+  runSolveLoopEdgeCounts(): boolean {
     let modified = true;
     let iteration = 0;
     const maxIterations = ((this.rows + 1) * (this.columns + 1)) ** 2;
@@ -1143,10 +1324,10 @@ class SlitherlinkBoard {
       // mark excluded and included edges and update adjacent edge counts
       for (const cellRow of this.cells) {
         for (const cell of cellRow) {
-          modified = this.updateEdges(cell, cell.topLeftCorner) || modified;
-          modified = this.updateEdges(cell, cell.topRightCorner) || modified;
-          modified = this.updateEdges(cell, cell.bottomLeftCorner) || modified;
-          modified = this.updateEdges(cell, cell.bottomRightCorner) || modified;
+          modified = this.updateEdgesEdgeCounts(cell, cell.topLeftCorner) || modified;
+          modified = this.updateEdgesEdgeCounts(cell, cell.topRightCorner) || modified;
+          modified = this.updateEdgesEdgeCounts(cell, cell.bottomLeftCorner) || modified;
+          modified = this.updateEdgesEdgeCounts(cell, cell.bottomRightCorner) || modified;
         }
       }
 
@@ -1163,7 +1344,7 @@ class SlitherlinkBoard {
   }
 
   // returns true if any edge is modified
-  private updateEdges(
+  private updateEdgesEdgeCounts(
     cell: Cell,
     corner: Corner,
   ): boolean {
@@ -1202,41 +1383,41 @@ class SlitherlinkBoard {
 
     if (cornerCount.size === 1) {
       if (cornerCount.has(0)) {
-        modified = this.markEdge(adjacentVEdge, 'x') || modified;
-        modified = this.markEdge(adjacentHEdge, 'x') || modified;
+        modified = this.markEdgeEdgeCounts(adjacentVEdge, 'x') || modified;
+        modified = this.markEdgeEdgeCounts(adjacentHEdge, 'x') || modified;
       } else if (cornerCount.has(1)) {
         if (adjacentVEdge.value === '-') {
-          modified = this.markEdge(adjacentHEdge, 'x') || modified;
+          modified = this.markEdgeEdgeCounts(adjacentHEdge, 'x') || modified;
         }
         if (adjacentVEdge.value === 'x') {
-          modified = this.markEdge(adjacentHEdge, '-') || modified;
+          modified = this.markEdgeEdgeCounts(adjacentHEdge, '-') || modified;
         }
         if (adjacentHEdge.value === '-') {
-          modified = this.markEdge(adjacentVEdge, 'x') || modified;
+          modified = this.markEdgeEdgeCounts(adjacentVEdge, 'x') || modified;
         }
         if (adjacentHEdge.value === 'x') {
-          modified = this.markEdge(adjacentVEdge, '-') || modified;
+          modified = this.markEdgeEdgeCounts(adjacentVEdge, '-') || modified;
         }
       } else if (cornerCount.has(2)) {
-        modified = this.markEdge(adjacentVEdge, '-') || modified;
-        modified = this.markEdge(adjacentHEdge, '-') || modified;
+        modified = this.markEdgeEdgeCounts(adjacentVEdge, '-') || modified;
+        modified = this.markEdgeEdgeCounts(adjacentHEdge, '-') || modified;
       }
     }
 
     // handle special case of outer edges
     if (adjacentVEdgeCornerCount.size === 1 && (adjacentVEdge.row === 0 || adjacentVEdge.row === this.rows)) {
       if (adjacentVEdgeCornerCount.has(0)) {
-        modified = this.markEdge(adjacentVEdge, 'x') || modified;
+        modified = this.markEdgeEdgeCounts(adjacentVEdge, 'x') || modified;
       } else if (adjacentVEdgeCornerCount.has(1)) {
-        modified = this.markEdge(adjacentVEdge, '-') || modified;
+        modified = this.markEdgeEdgeCounts(adjacentVEdge, '-') || modified;
       }
     }
 
     if (adjacentHEdgeCornerCount.size === 1 && (adjacentHEdge.col === 0 || adjacentHEdge.col === this.columns)) {
       if (adjacentHEdgeCornerCount.has(0)) {
-        modified = this.markEdge(adjacentHEdge, 'x') || modified;
+        modified = this.markEdgeEdgeCounts(adjacentHEdge, 'x') || modified;
       } else if (adjacentHEdgeCornerCount.has(1)) {
-        modified = this.markEdge(adjacentHEdge, '-') || modified;
+        modified = this.markEdgeEdgeCounts(adjacentHEdge, '-') || modified;
       }
     }
 
@@ -1255,7 +1436,7 @@ class SlitherlinkBoard {
   }
 
   // returns true if edge was modified
-  markEdge(edge: VEdge | HEdge, value: string): boolean {
+  markEdgeEdgeCounts(edge: VEdge | HEdge, value: string): boolean {
     let modified = false;
 
     if (edge.value !== value) {
@@ -1376,6 +1557,13 @@ class SlitherlinkBoard {
     }
 
     return modified;
+  }
+
+  private cloneSet(source: Set<number>, target: Set<number>) {
+    target.clear();
+    source.forEach(value => {
+      target.add(value);
+    });
   }
 }
 
