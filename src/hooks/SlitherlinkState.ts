@@ -9,9 +9,9 @@ interface ISlitherlinkState {
   quote: IQuote;
   debugLevel: number;
   handleHEdgeClick: (row: number, col: number) => void;
-  handleHEdgeRightClick: (row: number, col: number) => void;
+  handleHEdgeContextMenu: (row: number, col: number) => void;
   handleVEdgeClick: (row: number, col: number) => void;
-  handleVEdgeRightClick: (row: number, col: number) => void;
+  handleVEdgeContextMenu: (row: number, col: number) => void;
   handleReset: () => void;
   handleResetConfirm: (button: string) => void;
   handleSolve: () => void;
@@ -20,6 +20,15 @@ interface ISlitherlinkState {
 }
 
 const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
+  const sixBySixHard = [
+    ['', '', '', '', '0', ''],
+    ['3', '3', '', '', '1', ''],
+    ['', '', '1', '2', '', ''],
+    ['', '', '2', '0', '', ''],
+    ['', '1', '', '', '1', '1'],
+    ['', '2', '', '', '', '']
+  ];
+
   const sevenBySeven = [
     ['2', '2', '2', '3', '3', '1', ''],
     ['', '', '0', '2', '', '3', ''],
@@ -42,8 +51,46 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
     ['2', '3']
   ];
 
+  const twentyFourByTwelveHard = [
+    ['2', '2', '', '', '3', '', '', '', '3', '', '', '', '1', '3', '2', '2', '', '', '3', '', '', '2', '3', ''],
+    ['3', '', '2', '1', '', '', '3', '1', '', '1', '2', '3', '', '3', '', '2', '', '2', '', '3', '2', '', '2', ''],
+    ['2', '', '', '', '', '', '3', '', '2', '', '', '1', '', '', '2', '0', '', '1', '', '', '', '1', '2', '2'],
+    ['2', '', '0', '', '', '3', '1', '', '', '1', '', '2', '', '', '', '', '', '2', '3', '2', '3', '', '', '2'],
+    ['2', '', '2', '', '', '', '2', '', '', '', '', '0', '', '3', '', '', '', '', '2', '', '', '', '2', ''],
+    ['', '', '', '0', '3', '', '', '', '', '1', '3', '', '3', '', '', '2', '1', '3', '', '3', '2', '3', '', '3'],
+    ['', '3', '', '', '3', '', '', '1', '', '1', '2', '', '', '', '', '2', '2', '', '', '', '', '', '', ''],
+    ['2', '', '', '', '', '', '2', '2', '', '', '', '', '2', '2', '2', '', '2', '', '2', '2', '3', '', '', '3'],
+    ['2', '', '', '2', '', '2', '', '3', '3', '', '2', '', '', '1', '2', '', '2', '2', '', '2', '3', '', '', ''],
+    ['3', '1', '2', '1', '2', '', '2', '', '2', '', '', '1', '', '', '', '', '', '', '2', '', '2', '', '', '3'],
+    ['', '', '3', '', '', '1', '', '', '', '', '', '3', '', '3', '2', '', '', '3', '', '', '', '', '3', '2'],
+    ['3', '1', '', '', '', '', '', '3', '', '', '1', '', '', '2', '', '', '1', '', '', '2', '', '2', '', ''],
+  ];
+
+  const twentyByTwentyHard = [
+    ['2', '', '', '', '', '2', '', '2', '', '1', '', '2', '', '2', '2', '', '3', '3', '', ''],
+    ['', '', '2', '', '3', '', '', '', '3', '', '3', '2', '', '', '', '', '1', '', '1', '2'],
+    ['1', '2', '', '', '2', '2', '3', '', '', '2', '', '', '', '2', '2', '', '3', '2', '', ''],
+    ['1', '', '2', '', '', '2', '', '', '2', '2', '', '', '', '', '', '', '', '2', '2', ''],
+    ['2', '', '', '1', '', '', '', '3', '3', '', '', '', '', '2', '1', '3', '', '1', '', ''],
+    ['1', '', '', '2', '2', '', '', '', '1', '3', '', '', '', '', '3', '1', '', '3', '', ''],
+    ['', '3', '2', '', '', '', '', '', '2', '', '', '3', '2', '', '', '1', '0', '', '', '3'],
+    ['3', '', '3', '', '', '2', '1', '', '', '3', '', '', '', '3', '', '2', '3', '', '2', ''],
+    ['2', '', '', '2', '', '2', '', '1', '', '', '1', '', '', '', '', '2', '', '1', '', ''],
+    ['', '', '2', '', '', '2', '2', '3', '3', '1', '', '', '3', '3', '', '', '2', '', '', ''],
+    ['2', '1', '3', '', '', '2', '', '', '', '2', '', '', '', '', '', '3', '', '', '3', '2'],
+    ['', '', '', '', '3', '', '', '', '1', '1', '', '2', '', '', '0', '', '1', '', '', '3'],
+    ['', '', '3', '', '2', '3', '2', '', '', '3', '2', '', '', '', '2', '', '2', '', '2', ''],
+    ['', '3', '', '2', '', '2', '', '2', '3', '2', '', '3', '', '', '', '', '', '2', '', '3'],
+    ['', '3', '', '', '', '1', '2', '', '', '2', '', '', '', '', '', '1', '2', '3', '', ''],
+    ['2', '', '2', '', '', '2', '1', '', '', '', '', '3', '3', '', '2', '', '3', '', '0', '2'],
+    ['', '', '3', '', '', '', '3', '', '2', '', '2', '', '', '2', '', '2', '', '', '2', ''],
+    ['', '1', '', '', '', '', '', '2', '', '', '0', '', '2', '1', '', '2', '', '', '', ''],
+    ['', '', '1', '', '3', '1', '2', '1', '', '', '2', '3', '2', '', '3', '', '', '2', '', ''],
+    ['3', '', '2', '1', '', '', '', '', '2', '2', '', '', '', '2', '2', '', '', '3', '2', '']
+  ];
+
   const debugLevel = 0;
-  const [board, setBoard] = useState(new SlitherlinkBoard(oneSolution, debugLevel));
+  const [board, setBoard] = useState(new SlitherlinkBoard(twentyFourByTwelveHard, debugLevel));
   const [status, setStatus] = useState('playing');
   const [dialog, setDialog] = useState('');
   const [quote, setQuote] = useState<IQuote>({ quote: '', author: '' });
@@ -67,24 +114,24 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
     }
   }
 
-  const handleHEdgeClick = (row: number, col: number) => {
+  const handleVEdgeClick = (row: number, col: number) => {
     board.vEdges[row][col].value = (board.vEdges[row][col].value === '-' ? '' : '-');
     setBoard(Object.create(board));
     checkIfSolved();
   };
 
-  const handleHEdgeRightClick = (row: number, col: number) => {
+  const handleVEdgeContextMenu = (row: number, col: number) => {
     board.vEdges[row][col].value = (board.vEdges[row][col].value === 'x' ? '' : 'x');
     setBoard(Object.create(board));
   }
 
-  const handleVEdgeClick = (row: number, col: number) => {
+  const handleHEdgeClick = (row: number, col: number) => {
     board.hEdges[row][col].value = (board.hEdges[row][col].value === '-' ? '' : '-');
     setBoard(Object.create(board));
     checkIfSolved();
   };
 
-  const handleVEdgeRightClick = (row: number, col: number) => {
+  const handleHEdgeContextMenu = (row: number, col: number) => {
     board.hEdges[row][col].value = (board.hEdges[row][col].value === 'x' ? '' : 'x');
     setBoard(Object.create(board));
   }
@@ -108,17 +155,8 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
 
   const handleSolveConfirm = (button: string) => {
     if (button === 'OK') {
-      const solutions = board.solve();
-
-      if (solutions === 0) {
-        window.alert('No solution found');
-      } else if (solutions > 1) {
-        window.alert('Multiple solutions found');
-      } else {
-        //result.board.removeXEdges();
-        setStatus('solved');
-      }
-
+      board.solve();
+      setStatus('solved');
       setBoard(Object.create(board));
     }
     setDialog('');
@@ -142,9 +180,9 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
     quote,
     debugLevel,
     handleHEdgeClick,
-    handleHEdgeRightClick,
+    handleHEdgeContextMenu,
     handleVEdgeClick,
-    handleVEdgeRightClick,
+    handleVEdgeContextMenu,
     handleReset,
     handleResetConfirm,
     handleSolve,

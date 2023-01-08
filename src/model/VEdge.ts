@@ -46,41 +46,27 @@ class VEdge {
   }
 
   get leftPath(): VEdge | HEdge | null {
-    let pathCount = 0;
-    let path = null;
     if (this.topLeftEdge?.value === '-') {
-      pathCount++;
-      path = this.topLeftEdge;
+      return this.topLeftEdge;
+    } else if (this.leftEdge?.value === '-') {
+      return this.leftEdge;
+    } else if (this.bottomLeftEdge?.value === '-') {
+      return this.bottomLeftEdge;
+    } else {
+      return null;
     }
-    if (this.leftEdge?.value === '-') {
-      pathCount++;
-      path = this.leftEdge;
-    }
-    if (this.bottomLeftEdge?.value === '-') {
-      pathCount++;
-      path = this.bottomLeftEdge;
-    }
-    if (pathCount !== 1) return null;
-    return path;
   }
 
   get rightPath(): VEdge | HEdge | null {
-    let pathCount = 0;
-    let path = null;
     if (this.topRightEdge?.value === '-') {
-      pathCount++;
-      path = this.topRightEdge;
+      return this.topRightEdge;
+    } else if (this.rightEdge?.value === '-') {
+      return this.rightEdge;
+    } else if (this.bottomRightEdge?.value === '-') {
+      return this.bottomRightEdge;
+    } else {
+      return null;
     }
-    if (this.rightEdge?.value === '-') {
-      pathCount++;
-      path = this.rightEdge;
-    }
-    if (this.bottomRightEdge?.value === '-') {
-      pathCount++;
-      path = this.bottomRightEdge;
-    }
-    if (pathCount !== 1) return null;
-    return path;
   }
 }
 

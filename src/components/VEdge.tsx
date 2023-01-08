@@ -3,11 +3,11 @@ interface IProps {
   col: number;
   value?: string;
   handleClick?(row: number, col: number): void;
-  handleRightClick?(row: number, col: number): void;
+  handleContextMenu?(row: number, col: number): void;
 }
 
 const VEdge = (props: IProps) => {
-  const { row, col, value = '', handleClick = (row, col) => { }, handleRightClick = (row, col) => { } } = props;
+  const { row, col, value = '', handleClick = (row, col) => { }, handleContextMenu = (row, col) => { } } = props;
 
   const style: Record<string, any> = {};
   if (value === '-') {
@@ -23,7 +23,7 @@ const VEdge = (props: IProps) => {
       onClick={() => handleClick(row, col)}
       onContextMenu={(e) => {
         e.preventDefault();
-        handleRightClick(row, col);
+        handleContextMenu(row, col);
       }
       }
     >

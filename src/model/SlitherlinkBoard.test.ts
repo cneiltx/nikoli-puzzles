@@ -1,3 +1,5 @@
+import MultipleSolutionsError from './MultipleSolutionsError';
+import NoSolutionError from './NoSolutionError';
 import SlitherlinkBoard from './SlitherlinkBoard';
 
 describe('invalid board initialization', () => {
@@ -5047,23 +5049,14 @@ describe('every corner must have exactly 0 or 2 connected edges', () => {
   });
 });
 
-describe('solution counts', () => {
+describe('no or multiple solutions', () => {
   it('no solution', () => {
     const values = [
       ['1', '1'],
       ['1', '1']
     ];
     const board = new SlitherlinkBoard(values);
-    expect(board.solve()).toEqual(0);
-  });
-
-  it('one solution', () => {
-    const values = [
-      ['2', '2'],
-      ['2', '2']
-    ];
-    const board = new SlitherlinkBoard(values);
-    expect(board.solve()).toEqual(1);
+    expect(() => board.solve()).toThrow(NoSolutionError);
   });
 
   it('two solutions', () => {
@@ -5072,25 +5065,12 @@ describe('solution counts', () => {
       ['2', '3']
     ];
     const board = new SlitherlinkBoard(values);
-    expect(board.solve()).toEqual(2);
+    expect(() => board.solve()).toThrow(MultipleSolutionsError);
   });
 });
 
-describe('solvable boards', () => {
-  it('6 x 6', () => {
-    const values = [
-      ['', '', '', '', '0', ''],
-      ['3', '3', '', '', '1', ''],
-      ['', '', '1', '2', '', ''],
-      ['', '', '2', '0', '', ''],
-      ['', '1', '', '', '1', '1'],
-      ['', '2', '', '', '', '']
-    ];
-    const board = new SlitherlinkBoard(values);
-    expect(board.solve()).toEqual(1);
-  });
-
-  it('7 x 7', () => {
+describe('one solution boards', () => {
+  it('7 x 7 easy', () => {
     const values = [
       ['2', '2', '2', '3', '3', '1', ''],
       ['', '', '0', '2', '', '3', ''],
@@ -5101,10 +5081,64 @@ describe('solvable boards', () => {
       ['3', '', '2', '', '', '3', '']
     ];
     const board = new SlitherlinkBoard(values);
-    expect(board.solve()).toEqual(1);
+    board.solve();
+    expect(board.isSolved()).toEqual(true);
   });
 
-  it.skip('20 x 20 hard', () => {
+  it('7 x 7 hard', () => {
+    const values = [
+      ['', '3', '', '2', '2', '', '1'],
+      ['3', '1', '2', '1', '2', '', ''],
+      ['3', '', '', '', '', '2', ''],
+      ['', '', '', '', '', '2', ''],
+      ['3', '', '3', '', '', '1', ''],
+      ['2', '0', '', '1', '3', '', ''],
+      ['', '', '3', '2', '2', '2', '3'],
+    ];
+    const board = new SlitherlinkBoard(values);
+    board.solve();
+    expect(board.isSolved()).toEqual(true);
+  });
+
+  it('10 x 10 hard', () => {
+    const values = [
+      ['', '', '3', '', '2', '', '', '3', '', '3'],
+      ['3', '2', '', '', '', '', '2', '', '1', '3'],
+      ['2', '', '2', '', '', '', '', '', '', ''],
+      ['', '3', '', '', '', '3', '', '', '3', ''],
+      ['', '', '3', '', '', '3', '', '3', '', ''],
+      ['', '2', '', '', '', '', '', '1', '1', ''],
+      ['', '3', '', '3', '3', '', '', '', '', ''],
+      ['2', '', '', '', '2', '', '2', '', '1', ''],
+      ['', '3', '1', '', '1', '', '', '', '2', '2'],
+      ['3', '', '3', '', '', '', '2', '3', '', '1'],
+    ];
+    const board = new SlitherlinkBoard(values);
+    board.solve();
+    expect(board.isSolved()).toEqual(true);
+  });
+
+  it('24 x 12 hard', () => {
+    const values = [
+      ['2', '2', '', '', '3', '', '', '', '3', '', '', '', '1', '3', '2', '2', '', '', '3', '', '', '2', '3', ''],
+      ['3', '', '2', '1', '', '', '3', '1', '', '1', '2', '3', '', '3', '', '2', '', '2', '', '3', '2', '', '2', ''],
+      ['2', '', '', '', '', '', '3', '', '2', '', '', '1', '', '', '2', '0', '', '1', '', '', '', '1', '2', '2'],
+      ['2', '', '0', '', '', '3', '1', '', '', '1', '', '2', '', '', '', '', '', '2', '3', '2', '3', '', '', '2'],
+      ['2', '', '2', '', '', '', '2', '', '', '', '', '0', '', '3', '', '', '', '', '2', '', '', '', '2', ''],
+      ['', '', '', '0', '3', '', '', '', '', '1', '3', '', '3', '', '', '2', '1', '3', '', '3', '2', '3', '', '3'],
+      ['', '3', '', '', '3', '', '', '1', '', '1', '2', '', '', '', '', '2', '2', '', '', '', '', '', '', ''],
+      ['2', '', '', '', '', '', '2', '2', '', '', '', '', '2', '2', '2', '', '2', '', '2', '2', '3', '', '', '3'],
+      ['2', '', '', '2', '', '2', '', '3', '3', '', '2', '', '', '1', '2', '', '2', '2', '', '2', '3', '', '', ''],
+      ['3', '1', '2', '1', '2', '', '2', '', '2', '', '', '1', '', '', '', '', '', '', '2', '', '2', '', '', '3'],
+      ['', '', '3', '', '', '1', '', '', '', '', '', '3', '', '3', '2', '', '', '3', '', '', '', '', '3', '2'],
+      ['3', '1', '', '', '', '', '', '3', '', '', '1', '', '', '2', '', '', '1', '', '', '2', '', '2', '', ''],
+    ];
+    const board = new SlitherlinkBoard(values);
+    board.solve();
+    expect(board.isSolved()).toEqual(true);
+  });
+
+  it('20 x 20 hard', () => {
     const values = [
       ['2', '', '', '', '', '2', '', '2', '', '1', '', '2', '', '2', '2', '', '3', '3', '', ''],
       ['', '', '2', '', '3', '', '', '', '3', '', '3', '2', '', '', '', '', '1', '', '1', '2'],
@@ -5127,7 +5161,8 @@ describe('solvable boards', () => {
       ['', '', '1', '', '3', '1', '2', '1', '', '', '2', '3', '2', '', '3', '', '', '2', '', ''],
       ['3', '', '2', '1', '', '', '', '', '2', '2', '', '', '', '2', '2', '', '', '3', '2', '']
     ];
-    const board = new SlitherlinkBoard(values, 1);
-    expect(board.solve()).toEqual(1);
+    const board = new SlitherlinkBoard(values);
+    board.solve();
+    expect(board.isSolved()).toEqual(true);
   });
 });

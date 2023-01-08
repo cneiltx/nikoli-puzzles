@@ -36,7 +36,7 @@ const SlitherlinkGame = (props: IProps) => {
           row={row} col={col}
           value={game.board.vEdges[row][col].value}
           handleClick={game.handleHEdgeClick}
-          handleRightClick={game.handleHEdgeRightClick} />
+          handleContextMenu={game.handleHEdgeContextMenu} />
       );
     }
     content.push(
@@ -58,10 +58,22 @@ const SlitherlinkGame = (props: IProps) => {
           row={row} col={col}
           value={game.board.hEdges[row][col].value}
           handleClick={game.handleVEdgeClick}
-          handleRightClick={game.handleVEdgeRightClick} />
+          handleContextMenu={game.handleVEdgeContextMenu} />
       );
       content.push(
-        <Cell key={`cell-${row}-${col}`} row={row} col={col} rows={game.board.rows} value={game.board.cells[row][col].value}
+        <Cell
+          key={`cell-${row}-${col}`}
+          row={row} col={col}
+          rows={game.board.rows}
+          value={game.board.cells[row][col].value}
+          handleClickTop={game.handleVEdgeClick}
+          handleClickBottom={game.handleVEdgeClick}
+          handleClickLeft={game.handleHEdgeClick}
+          handleClickRight={game.handleHEdgeClick}
+          handleContextMenuTop={game.handleVEdgeContextMenu}
+          handleContextMenuBottom={game.handleVEdgeContextMenu}
+          handleContextMenuLeft={game.handleHEdgeContextMenu}
+          handleContextMenuRight={game.handleHEdgeContextMenu}
         />
       );
     }
@@ -71,7 +83,7 @@ const SlitherlinkGame = (props: IProps) => {
         row={row} col={game.board.columns}
         value={game.board.hEdges[row][game.board.columns].value}
         handleClick={game.handleVEdgeClick}
-        handleRightClick={game.handleVEdgeRightClick} />
+        handleContextMenu={game.handleVEdgeContextMenu} />
     );
   }
   for (let col = 0; col < game.board.columns; col++) {
@@ -92,7 +104,7 @@ const SlitherlinkGame = (props: IProps) => {
         row={game.board.rows} col={col}
         value={game.board.vEdges[game.board.rows][col].value}
         handleClick={game.handleHEdgeClick}
-        handleRightClick={game.handleHEdgeRightClick} />
+        handleContextMenu={game.handleHEdgeContextMenu} />
     );
   }
   content.push(
@@ -109,7 +121,8 @@ const SlitherlinkGame = (props: IProps) => {
 
   const boardStyle: Record<string, any> = {
     gridTemplateColumns: '20fr 100fr '.repeat(game.board.columns).concat('20fr'),
-    gridTemplateRows: '20fr 100fr '.repeat(game.board.rows).concat('20fr')
+    gridTemplateRows: '20fr 100fr '.repeat(game.board.rows).concat('20fr'),
+    aspectRatio: `${game.board.columns} / ${game.board.rows}`,
   };
 
   if (game.status === 'solved' || game.dialog !== '') {

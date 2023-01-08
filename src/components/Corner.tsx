@@ -9,7 +9,7 @@ interface IProps {
   bottomRightValue?: string;
   showCornerValues?: boolean;
   handleClick?(row: number, col: number): void;
-  handleRightClick?(row: number, col: number): void;
+  handleContextMenu?(row: number, col: number): void;
 }
 
 const Corner = (props: IProps) => {
@@ -23,7 +23,7 @@ const Corner = (props: IProps) => {
     bottomLeftValue = '',
     bottomRightValue = '',
     showCornerValues = false,
-    handleClick = (row, col) => { }, handleRightClick = (row, col) => { }
+    handleClick = (row, col) => { }, handleContextMenu = (row, col) => { }
   } = props;
 
   return (
@@ -32,7 +32,7 @@ const Corner = (props: IProps) => {
       onClick={() => handleClick(row, col)}
       onContextMenu={(e) => {
         e.preventDefault();
-        handleRightClick(row, col);
+        handleContextMenu(row, col);
       }
       }
     >
