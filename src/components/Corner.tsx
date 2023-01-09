@@ -1,13 +1,7 @@
 interface IProps {
   row: number;
   col: number;
-  rows: number;
   value?: string;
-  topLeftValue?: string;
-  topRightValue?: string;
-  bottomLeftValue?: string;
-  bottomRightValue?: string;
-  showCornerValues?: boolean;
   handleClick?(row: number, col: number): void;
   handleContextMenu?(row: number, col: number): void;
 }
@@ -16,13 +10,7 @@ const Corner = (props: IProps) => {
   const {
     row,
     col,
-    rows,
     value = '',
-    topLeftValue = '',
-    topRightValue = '',
-    bottomLeftValue = '',
-    bottomRightValue = '',
-    showCornerValues = false,
     handleClick = (row, col) => { }, handleContextMenu = (row, col) => { }
   } = props;
 
@@ -37,18 +25,6 @@ const Corner = (props: IProps) => {
       }
     >
       {value}
-      {showCornerValues && topLeftValue && <div className='cornerTopLeft' style={{ fontSize: `${8 / rows}vh` }}>
-        {topLeftValue}
-      </div>}
-      {showCornerValues && topRightValue && <div className='cornerTopRight' style={{ fontSize: `${8 / rows}vh` }}>
-        {topRightValue}
-      </div>}
-      {showCornerValues && bottomLeftValue && <div className='cornerBottomLeft' style={{ fontSize: `${8 / rows}vh` }}>
-        {bottomLeftValue}
-      </div>}
-      {showCornerValues && bottomRightValue && <div className='cornerBottomRight' style={{ fontSize: `${8 / rows}vh` }}>
-        {bottomRightValue}
-      </div>}
     </div>
   );
 };

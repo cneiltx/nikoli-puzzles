@@ -1,9 +1,8 @@
 import Corner from './Corner';
 import VEdge from './VEdge';
 import HEdge from './HEdge';
-import IEdgeCount from './IEdgeCount';
 
-class Cell implements IEdgeCount {
+class Cell {
   row: number;
   col: number;
   value: string;
@@ -64,22 +63,6 @@ class Cell implements IEdgeCount {
 
   get bottomRightCell() {
     return this.bottomRightCorner.bottomRightCell;
-  }
-
-  get topLeftEdgeCount() {
-    return this.topLeftCorner.bottomRightEdgeCount;
-  }
-
-  get topRightEdgeCount() {
-    return this.topRightCorner.bottomLeftEdgeCount;
-  }
-
-  get bottomLeftEdgeCount() {
-    return this.bottomLeftCorner.topRightEdgeCount;
-  }
-
-  get bottomRightEdgeCount() {
-    return this.bottomRightCorner.topLeftEdgeCount;
   }
 
   get isCornerCell() {

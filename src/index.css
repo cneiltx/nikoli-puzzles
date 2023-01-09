@@ -110,30 +110,6 @@ select {
   white-space: nowrap;
 }
 
-.cornerTopLeft {
-  position: absolute;
-  right: 100%;
-  bottom: 100%;
-}
-
-.cornerTopRight {
-  position: absolute;
-  left: 100%;
-  bottom: 100%;
-}
-
-.cornerBottomLeft {
-  position: absolute;
-  top: 100%;
-  right: 100%;
-}
-
-.cornerBottomRight {
-  position: absolute;
-  left: 100%;
-  top: 100%;
-}
-
 .dialogBackground {
   position: fixed;
   top: 0;

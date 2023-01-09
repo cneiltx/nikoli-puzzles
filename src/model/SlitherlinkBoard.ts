@@ -2,7 +2,6 @@ import Cell from './Cell';
 import Corner from './Corner';
 import VEdge from './VEdge';
 import HEdge from './HEdge';
-import IEdgeCount from './IEdgeCount';
 import MultipleSolutionsError from './MultipleSolutionsError';
 import NoSolutionError from './NoSolutionError';
 
@@ -136,10 +135,6 @@ class SlitherlinkBoard {
     clone.corners.forEach((cornerRow, rowIndex) => {
       cornerRow.forEach((corner, colIndex) => {
         corner.value = this.corners[rowIndex][colIndex].value;
-        this.cloneSet(this.corners[rowIndex][colIndex].topLeftEdgeCount, corner.topLeftEdgeCount);
-        this.cloneSet(this.corners[rowIndex][colIndex].topRightEdgeCount, corner.topRightEdgeCount);
-        this.cloneSet(this.corners[rowIndex][colIndex].bottomLeftEdgeCount, corner.bottomLeftEdgeCount);
-        this.cloneSet(this.corners[rowIndex][colIndex].bottomRightEdgeCount, corner.bottomRightEdgeCount);
       });
     });
 
@@ -150,94 +145,72 @@ class SlitherlinkBoard {
     let output = '';
     let row1: string;
     let row2: string;
-    let row3: string;
-    let row4: string;
 
     this.cells.forEach((cellRow, rowIndex) => {
-      row1 = Array.from(cellRow[0].topLeftCorner.topLeftEdgeCount).join(' ').padStart(5) + (cellRow[0].topCell?.leftEdge.value === '-' ? '|' : ' ') +
-        Array.from(cellRow[0].topLeftCorner.topRightEdgeCount).join(' ').padEnd(5);
-      row2 = '     ■';
-      row3 = Array.from(cellRow[0].topLeftCorner.bottomLeftEdgeCount).join(' ').padStart(5) + (cellRow[0].leftEdge.value === '-' ? '|' : ' ') +
-        Array.from(cellRow[0].topLeftCorner.bottomRightEdgeCount).join(' ').padEnd(5);
+      row1 = '■';
 
       switch (cellRow[0].leftEdge.value) {
         case '':
-          row4 = ' '.repeat(6);
+          row2 = ' ';
           break;
         case '-':
-          row4 = '|'.padStart(6);
+          row2 = '|';
           break;
         case 'x':
-          row4 = 'X'.padStart(6);
+          row2 = 'x';
           break;
       }
 
       cellRow.forEach((cell, colIndex) => {
-        row1 += Array.from(cell.topRightCorner.topLeftEdgeCount).join(' ').padStart(8) + (cell.topCell?.rightEdge.value === '-' ? '|' : ' ') +
-          Array.from(cell.topRightCorner.topRightEdgeCount).join(' ').padEnd(5);
-
         switch (cell.topEdge.value) {
           case '':
-            row2 += ' '.repeat(13);
+            row1 += '   ';
             break;
           case '-':
-            row2 += '-'.repeat(13);
+            row1 += '---';
             break;
           case 'x':
-            row2 += '      X      ';
+            row1 += ' x ';
             break;
         }
 
-        row2 += '■';
-        row3 += Array.from(cell.topRightCorner.bottomLeftEdgeCount).join(' ').padStart(8) + (cell.rightEdge.value === '-' ? '|' : ' ') +
-          Array.from(cell.topRightCorner.bottomRightEdgeCount).join(' ').padEnd(5);
-        row4 += cell.value.padStart(7).padEnd(13)
+        row1 += '■';
+        row2 += cell.value.padStart(2);
 
         switch (cell.rightEdge.value) {
           case '':
-            row4 += ' ';
+            row2 += '  ';
             break;
           case '-':
-            row4 += '|';
+            row2 += ' |';
             break;
           case 'x':
-            row4 += 'X';
+            row2 += ' x';
             break;
         }
       });
 
-      output += [row1, row2, row3, row4].join('\n') + '\n';
+      output += [row1, row2].join('\n') + '\n';
     });
 
-    row1 = Array.from(this.cells[this.rows - 1][0].bottomLeftCorner.topLeftEdgeCount).join(' ').padStart(5) +
-      (this.cells[this.rows - 1][0].leftEdge.value === '-' ? '|' : ' ') +
-      Array.from(this.cells[this.rows - 1][0].bottomLeftCorner.topRightEdgeCount).join(' ').padEnd(5);
-    row2 = '     ■';
-    row3 = Array.from(this.cells[this.rows - 1][0].bottomLeftCorner.bottomLeftEdgeCount).join(' ').padStart(5) +
-      ' ' + Array.from(this.cells[this.rows - 1][0].bottomLeftCorner.bottomRightEdgeCount).join(' ').padEnd(5);
-
+    row1 = '■';
     this.cells[this.rows - 1].forEach((cell, colIndex) => {
-      row1 += Array.from(cell.bottomRightCorner.topLeftEdgeCount).join(' ').padStart(8) + (cell.rightEdge.value === '-' ? '|' : ' ') +
-        Array.from(cell.bottomRightCorner.topRightEdgeCount).join(' ').padEnd(5);
-
       switch (cell.bottomEdge.value) {
         case '':
-          row2 += ' '.repeat(13);
+          row1 += '   ';
           break;
         case '-':
-          row2 += '-'.repeat(13);
+          row1 += '---';
           break;
         case 'x':
-          row2 += '      X      ';
+          row1 += ' x ';
           break;
       }
 
-      row2 += '■';
-      row3 += Array.from(cell.bottomRightCorner.bottomLeftEdgeCount).join(' ').padStart(8) +
-        ' ' + Array.from(cell.bottomRightCorner.bottomRightEdgeCount).join(' ').padEnd(5);
+      row1 += '■';
     });
 
-    output += [row1, row2, row3].join('\n') + '\n';
+    output += row1 + '\n';
     const diffOutput = this.diff(output, this.prevDebugOutput);
     this.prevDebugOutput = output;
     return diffOutput;
@@ -346,115 +319,6 @@ class SlitherlinkBoard {
     }
 
     this.removeDeletedEdges();
-  }
-
-  private iterativeSolve() {
-    const boardQueue: SlitherlinkBoard[] = [this];
-    let solutions = 0;
-    let iteration = 0;
-
-    while (boardQueue.length > 0) {
-      let board: SlitherlinkBoard = boardQueue.shift()!;
-      iteration++;
-
-      if (this.debugLevel > 0) {
-        console.log(`Solve iteration ${iteration}`);
-      }
-
-      if (!board.runSolveLoop()) {
-        if (this.debugLevel > 0) {
-          console.log(`No solution found: conflict detected`);
-        }
-        continue;
-      }
-
-      let solvedResult = board.runSolvedCheck();
-      if (!solvedResult.isValid) {
-        if (this.debugLevel > 0) {
-          console.log('No solution found: board is invalid');
-        }
-        continue;
-      }
-
-      if (solvedResult.isSolved) {
-        if (this.debugLevel > 0) {
-          console.log('Solution found');
-        }
-
-        solutions++;
-
-        if (solutions > 1) {
-          if (this.debugLevel > 0) {
-            console.log('Multiple solutions found');
-          }
-          throw new MultipleSolutionsError();
-        } else {
-          this.apply(board);
-        }
-      } else {
-        let selectedEdge: VEdge | HEdge | undefined;
-
-        for (const edgeRow of board.vEdges) {
-          for (const edge of edgeRow) {
-            if (edge.value === '') {
-              selectedEdge = edge;
-              break;
-            }
-          }
-
-          if (selectedEdge) {
-            break;
-          }
-        }
-
-        if (selectedEdge === undefined) {
-          for (const edgeRow of board.hEdges) {
-            for (const edge of edgeRow) {
-              if (edge.value === '') {
-                selectedEdge = edge;
-                break;
-              }
-            }
-
-            if (selectedEdge) {
-              break;
-            }
-          }
-        }
-
-        if (selectedEdge === undefined) {
-          if (this.debugLevel > 0) {
-            console.log('No solution found: no unset edges');
-          }
-        } else {
-          // first, try setting the selected edge
-          let clone = board.deepClone();
-          let cloneEdge = selectedEdge instanceof VEdge ?
-            clone.vEdges[selectedEdge.row][selectedEdge.col] : clone.hEdges[selectedEdge.row][selectedEdge.col];
-          clone.markEdge(cloneEdge, '-');
-          boardQueue.push(clone);
-
-          if (this.debugLevel > 0) {
-            console.log(`Enqueueing board with included ${cloneEdge instanceof HEdge ? 'horizontal' : 'vertical'} edge {${cloneEdge.row}, ${cloneEdge.col}}`);
-          }
-
-          // second, try unsetting the selected edge
-          clone = board.deepClone();
-          cloneEdge = selectedEdge instanceof VEdge ?
-            clone.vEdges[selectedEdge.row][selectedEdge.col] : clone.hEdges[selectedEdge.row][selectedEdge.col];
-          clone.markEdge(cloneEdge, 'x');
-          boardQueue.push(clone);
-
-          if (this.debugLevel > 0) {
-            console.log(`Enqueueing board with excluded ${cloneEdge instanceof HEdge ? 'horizontal' : 'vertical'} edge {${cloneEdge.row}, ${cloneEdge.col}}`);
-          }
-        }
-      }
-    }
-
-    if (solutions === 0) {
-      throw new NoSolutionError();
-    }
   }
 
   private recursiveSolve(depth: number): IRecursiveSolveResult {
@@ -655,10 +519,6 @@ class SlitherlinkBoard {
   }
 
   runOneTimeSolvePass() {
-    this.runOneTimeSolvePassEdgeCounts();
-  }
-
-  private runOneTimeSolvePassWikipedia() {
     for (const cellRow of this.cells) {
       for (const cell of cellRow) {
         // 0 cell
@@ -742,11 +602,6 @@ class SlitherlinkBoard {
 
   // returns false if any conflicts occur
   runSolveLoop(): boolean {
-    return this.runSolveLoopEdgeCounts();
-  }
-
-  // returns false if any conflicts occur
-  private runSolveLoopWikipedia(): boolean {
     let modified = true;
     let iteration = 0;
 
@@ -1595,15 +1450,7 @@ class SlitherlinkBoard {
     return { isModified: modified, isConflict: conflict };
   }
 
-  markEdge(edge: VEdge | HEdge | null | undefined, value: string): IMarkEdgeResult {
-    if (edge === null || edge === undefined) {
-      return { isModified: false, isConflict: false };
-    } else {
-      return this.markEdgeEdgeCounts(edge, value);
-    }
-  }
-
-  private markEdgeNoCounts(edge: VEdge | HEdge | null | undefined, value: string): IMarkEdgeResult {
+  private markEdge(edge: VEdge | HEdge | null | undefined, value: string): IMarkEdgeResult {
     if (edge) {
       if (edge.value === value) {
         return { isModified: false, isConflict: false };
@@ -1616,432 +1463,6 @@ class SlitherlinkBoard {
     } else {
       return { isModified: false, isConflict: false };
     }
-  }
-
-  private runOneTimeSolvePassEdgeCounts() {
-    // set cell possible edge counts based on cell values
-    for (const cellRow of this.cells) {
-      for (const cell of cellRow) {
-        switch (cell.value) {
-          case '0':
-            this.applyCellValueRule(cell, [1, 2]);
-            break;
-          case '1':
-            this.applyCellValueRule(cell, [2]);
-            break;
-          case '3':
-            this.applyCellValueRule(cell, [0]);
-            break;
-        }
-      }
-    }
-
-    // remove 2 from outer corner edge counts
-    for (const corner of this.corners[0]) {
-      corner.topLeftEdgeCount.delete(2);
-      corner.topRightEdgeCount.delete(2);
-    }
-    for (const corner of this.corners[this.rows]) {
-      corner.bottomLeftEdgeCount.delete(2);
-      corner.bottomRightEdgeCount.delete(2);
-    }
-    for (const cornerRow of this.corners) {
-      cornerRow[0].topLeftEdgeCount.delete(2);
-      cornerRow[0].bottomLeftEdgeCount.delete(2);
-      cornerRow[this.columns].topRightEdgeCount.delete(2);
-      cornerRow[this.columns].bottomRightEdgeCount.delete(2);
-    }
-
-    // remove 1 from outer board corners
-    this.corners[0][0].topLeftEdgeCount.delete(1);
-    this.corners[0][this.columns].topRightEdgeCount.delete(1);
-    this.corners[this.rows][0].bottomLeftEdgeCount.delete(1);
-    this.corners[this.rows][this.columns].bottomRightEdgeCount.delete(1);
-
-    // special case of adjacent 1 cells on outer edge
-    for (const cellRow of this.cells) {
-      for (const cell of cellRow) {
-        if ((cell.row === 0 || cell.row === this.rows - 1) && cell.value === '1' && cell.rightCell?.value === '1') {
-          this.markEdgeEdgeCounts(cell.rightEdge, 'x');
-        }
-
-        if ((cell.col === 0 || cell.col === this.columns - 1) && cell.value === '1' && cell.bottomCell?.value === '1') {
-          this.markEdgeEdgeCounts(cell.bottomEdge, 'x');
-        }
-      }
-    }
-
-    // special case of adjacent 3 cells
-    for (const cellRow of this.cells) {
-      for (const cell of cellRow) {
-        if (cell.value === '3' && cell.rightCell?.value === '3') {
-          this.markEdgeEdgeCounts(cell.leftEdge, '-');
-          this.markEdgeEdgeCounts(cell.rightEdge, '-');
-          this.markEdgeEdgeCounts(cell.rightCell.rightEdge, '-');
-          if (cell.topCell) {
-            this.markEdgeEdgeCounts(cell.topCell.rightEdge, 'x');
-          }
-          if (cell.bottomCell) {
-            this.markEdgeEdgeCounts(cell.bottomCell.rightEdge, 'x');
-          }
-        }
-
-        if (cell.value === '3' && cell.bottomCell?.value === '3') {
-          this.markEdgeEdgeCounts(cell.topEdge, '-');
-          this.markEdgeEdgeCounts(cell.bottomEdge, '-');
-          this.markEdgeEdgeCounts(cell.bottomCell.bottomEdge, '-');
-          if (cell.leftCell) {
-            this.markEdgeEdgeCounts(cell.leftCell.bottomEdge, 'x');
-          }
-          if (cell.rightCell) {
-            this.markEdgeEdgeCounts(cell.rightCell.bottomEdge, 'x');
-          }
-        }
-      }
-    }
-
-    if (this.debugLevel > 0) {
-      this.prettyPrint();
-    }
-  }
-
-  // returns false if any conflicts occur
-  private runSolveLoopEdgeCounts(): boolean {
-    let modified = true;
-    let iteration = 0;
-
-    while (modified) {
-      modified = false;
-      iteration++;
-
-      // apply deductions based on cell value and possible edge counts
-      for (const cellRow of this.cells) {
-        for (const cell of cellRow) {
-          switch (cell.value) {
-            case '1':
-              modified = this.applyEdgeCountRule(cell, [0], [0]) || modified;
-              modified = this.applyEdgeCountRule(cell, [1], [1]) || modified;
-              break;
-            case '2':
-              modified = this.applyEdgeCountRule(cell, [0], [0, 1], [0, 2]) || modified;
-              modified = this.applyEdgeCountRule(cell, [1], [0, 2]) || modified;
-              modified = this.applyEdgeCountRule(cell, [2], [1, 2], [0, 2]) || modified;
-              modified = this.applyEdgeCountRule(cell, [0, 1], [0]) || modified;
-              modified = this.applyEdgeCountRule(cell, [1, 2], [2]) || modified;
-              modified = this.applyEdgeCountRule(cell, [0, 2], [1], [0, 2]) || modified;
-              break;
-            case '3':
-              modified = this.applyEdgeCountRule(cell, [1], [1]) || modified;
-              modified = this.applyEdgeCountRule(cell, [2], [2]) || modified;
-              break;
-          }
-        }
-      }
-
-      // apply deductions based on corner edge counts
-      for (const cornerRow of this.corners) {
-        for (const corner of cornerRow) {
-          modified = this.applyEdgeCountRule(corner, [0], [1], [2]) || modified;
-          modified = this.applyEdgeCountRule(corner, [1], [0, 2]) || modified;
-          modified = this.applyEdgeCountRule(corner, [2], [1, 2], [0, 2]) || modified;
-          modified = this.applyEdgeCountRule(corner, [1, 2], [2]) || modified;
-          modified = this.applyEdgeCountRule(corner, [0, 2], [1], [2]) || modified;
-
-          // if any edge counts are empty, we have an unsolvable board
-          if (corner.topLeftEdgeCount.size === 0 ||
-            corner.topRightEdgeCount.size === 0 ||
-            corner.bottomLeftEdgeCount.size === 0 ||
-            corner.bottomRightEdgeCount.size === 0
-          ) {
-            if (this.debugLevel > 0) {
-              console.log('Unsolvable due to empty edge count');
-            }
-            return false;
-          }
-        }
-      }
-
-      // mark excluded and included edges and update adjacent edge counts
-      let conflict = false;
-
-      for (const cellRow of this.cells) {
-        for (const cell of cellRow) {
-          let edgeResult = this.updateEdgesEdgeCounts(cell, cell.topLeftCorner);
-          modified ||= edgeResult.isModified;
-          conflict ||= edgeResult.isConflict;
-          edgeResult = this.updateEdgesEdgeCounts(cell, cell.topRightCorner);
-          modified ||= edgeResult.isModified;
-          conflict ||= edgeResult.isConflict;
-          edgeResult = this.updateEdgesEdgeCounts(cell, cell.bottomLeftCorner);
-          modified ||= edgeResult.isModified;
-          conflict ||= edgeResult.isConflict;
-          edgeResult = this.updateEdgesEdgeCounts(cell, cell.bottomRightCorner);
-          modified ||= edgeResult.isModified;
-          conflict ||= edgeResult.isConflict;
-        }
-      }
-
-      if (this.debugLevel > 1) {
-        console.log(`After solve loop iteration ${iteration}:\n` + this.prettyPrint());
-      }
-
-      if (conflict) {
-        return false;
-      }
-    }
-
-    if (this.debugLevel > 0) {
-      console.log(`Solve loop completed after ${iteration} iterations`);
-    }
-
-    return true;
-  }
-
-  // returns true if any edge is modified
-  private updateEdgesEdgeCounts(
-    cell: Cell,
-    corner: Corner,
-  ): IMarkEdgeResult {
-    let modified = false;
-    let conflict = false;
-    let cornerCount: Set<number>;
-    let adjacentVEdge: VEdge;
-    let adjacentHEdge: HEdge;
-    let adjacentVEdgeCornerCount: Set<number>;
-    let adjacentHEdgeCornerCount: Set<number>;
-
-    if (corner === cell.topLeftCorner) {
-      cornerCount = cell.topLeftEdgeCount;
-      adjacentVEdge = cell.topEdge;
-      adjacentHEdge = cell.leftEdge;
-      adjacentVEdgeCornerCount = cell.topLeftCorner.topRightEdgeCount;
-      adjacentHEdgeCornerCount = cell.topLeftCorner.bottomLeftEdgeCount;
-    } else if (corner === cell.topRightCorner) {
-      cornerCount = cell.topRightEdgeCount;
-      adjacentVEdge = cell.topEdge;
-      adjacentHEdge = cell.rightEdge;
-      adjacentVEdgeCornerCount = cell.topRightCorner.topLeftEdgeCount;
-      adjacentHEdgeCornerCount = cell.topRightCorner.bottomRightEdgeCount;
-    } else if (corner === cell.bottomLeftCorner) {
-      cornerCount = cell.bottomLeftEdgeCount;
-      adjacentVEdge = cell.bottomEdge;
-      adjacentHEdge = cell.leftEdge;
-      adjacentVEdgeCornerCount = cell.bottomLeftCorner.bottomRightEdgeCount;
-      adjacentHEdgeCornerCount = cell.bottomLeftCorner.topLeftEdgeCount;
-    } else {
-      cornerCount = cell.bottomRightEdgeCount;
-      adjacentVEdge = cell.bottomEdge;
-      adjacentHEdge = cell.rightEdge;
-      adjacentVEdgeCornerCount = cell.bottomRightCorner.bottomLeftEdgeCount;
-      adjacentHEdgeCornerCount = cell.bottomRightCorner.topRightEdgeCount;
-    }
-
-    if (cornerCount.size === 1) {
-      if (cornerCount.has(0)) {
-        let edgeResult = this.markEdgeEdgeCounts(adjacentVEdge, 'x');
-        modified ||= edgeResult.isModified;
-        conflict ||= edgeResult.isConflict;
-        edgeResult = this.markEdgeEdgeCounts(adjacentHEdge, 'x');
-      } else if (cornerCount.has(1)) {
-        if (adjacentVEdge.value === '-') {
-          const edgeResult = this.markEdgeEdgeCounts(adjacentHEdge, 'x');
-          modified ||= edgeResult.isModified;
-          conflict ||= edgeResult.isConflict;
-        }
-        if (adjacentVEdge.value === 'x') {
-          const edgeResult = this.markEdgeEdgeCounts(adjacentHEdge, '-');
-          modified ||= edgeResult.isModified;
-          conflict ||= edgeResult.isConflict;
-        }
-        if (adjacentHEdge.value === '-') {
-          const edgeResult = this.markEdgeEdgeCounts(adjacentVEdge, 'x');
-          modified ||= edgeResult.isModified;
-          conflict ||= edgeResult.isConflict;
-        }
-        if (adjacentHEdge.value === 'x') {
-          const edgeResult = this.markEdgeEdgeCounts(adjacentVEdge, '-');
-          modified ||= edgeResult.isModified;
-          conflict ||= edgeResult.isConflict;
-        }
-      } else if (cornerCount.has(2)) {
-        let edgeResult = this.markEdgeEdgeCounts(adjacentVEdge, '-');
-        modified ||= edgeResult.isModified;
-        conflict ||= edgeResult.isConflict;
-        edgeResult = this.markEdgeEdgeCounts(adjacentHEdge, '-');
-        modified ||= edgeResult.isModified;
-        conflict ||= edgeResult.isConflict;
-      }
-    }
-
-    // handle special case of outer edges
-    if (adjacentVEdgeCornerCount.size === 1 && (adjacentVEdge.row === 0 || adjacentVEdge.row === this.rows)) {
-      if (adjacentVEdgeCornerCount.has(0)) {
-        const edgeResult = this.markEdgeEdgeCounts(adjacentVEdge, 'x');
-        modified ||= edgeResult.isModified;
-        conflict ||= edgeResult.isConflict;
-      } else if (adjacentVEdgeCornerCount.has(1)) {
-        const edgeResult = this.markEdgeEdgeCounts(adjacentVEdge, '-');
-        modified ||= edgeResult.isModified;
-        conflict ||= edgeResult.isConflict;
-      }
-    }
-
-    if (adjacentHEdgeCornerCount.size === 1 && (adjacentHEdge.col === 0 || adjacentHEdge.col === this.columns)) {
-      if (adjacentHEdgeCornerCount.has(0)) {
-        const edgeResult = this.markEdgeEdgeCounts(adjacentHEdge, 'x');
-        modified ||= edgeResult.isModified;
-        conflict ||= edgeResult.isConflict;
-      } else if (adjacentHEdgeCornerCount.has(1)) {
-        const edgeResult = this.markEdgeEdgeCounts(adjacentHEdge, '-');
-        modified ||= edgeResult.isModified;
-        conflict ||= edgeResult.isConflict;
-      }
-    }
-
-    // handle case where both adjacent edges are included or excluded
-    if (adjacentVEdge.value === 'x' && adjacentHEdge.value === 'x') {
-      modified = cornerCount.delete(1) || modified;
-      modified = cornerCount.delete(2) || modified;
-    }
-
-    if (adjacentVEdge.value === '-' && adjacentHEdge.value === '-') {
-      modified = cornerCount.delete(0) || modified;
-      modified = cornerCount.delete(1) || modified;
-    }
-
-    return { isModified: modified, isConflict: conflict };
-  }
-
-  // returns true if edge was modified
-  private markEdgeEdgeCounts(edge: VEdge | HEdge, value: string): IMarkEdgeResult {
-    if (edge.value === value) {
-      return { isModified: false, isConflict: false };
-    } else if (edge.value === '') {
-      edge.value = value;
-
-      if (value === 'x') {
-        if (edge instanceof VEdge) {
-          edge.leftCorner.topRightEdgeCount.delete(2);
-          edge.rightCorner.topLeftEdgeCount.delete(2);
-          edge.leftCorner.bottomRightEdgeCount.delete(2);
-          edge.rightCorner.bottomLeftEdgeCount.delete(2);
-
-          if (edge.row === 0) {
-            edge.leftCorner.topRightEdgeCount.delete(1);
-            edge.rightCorner.topLeftEdgeCount.delete(1);
-          } else if (edge.row === this.rows) {
-            edge.leftCorner.bottomRightEdgeCount.delete(1);
-            edge.rightCorner.bottomLeftEdgeCount.delete(1);
-          }
-        } else {
-          edge.topCorner.bottomLeftEdgeCount.delete(2);
-          edge.bottomCorner.topLeftEdgeCount.delete(2);
-          edge.topCorner.bottomRightEdgeCount.delete(2);
-          edge.bottomCorner.topRightEdgeCount.delete(2);
-
-          if (edge.col === 0) {
-            edge.topCorner.bottomLeftEdgeCount.delete(1);
-            edge.bottomCorner.topLeftEdgeCount.delete(1);
-          } else if (edge.col === this.columns) {
-            edge.topCorner.bottomRightEdgeCount.delete(1);
-            edge.bottomCorner.topRightEdgeCount.delete(1);
-          }
-        }
-      } else if (value === '-') {
-        if (edge instanceof VEdge) {
-          edge.leftCorner.topRightEdgeCount.delete(0);
-          edge.rightCorner.topLeftEdgeCount.delete(0);
-          edge.leftCorner.bottomRightEdgeCount.delete(0);
-          edge.rightCorner.bottomLeftEdgeCount.delete(0);
-        } else {
-          edge.topCorner.bottomLeftEdgeCount.delete(0);
-          edge.bottomCorner.topLeftEdgeCount.delete(0);
-          edge.topCorner.bottomRightEdgeCount.delete(0);
-          edge.bottomCorner.topRightEdgeCount.delete(0);
-        }
-      }
-
-      return { isModified: true, isConflict: false };
-    } else {
-      return { isModified: false, isConflict: true };
-    }
-  }
-
-  private applyCellValueRule(cell: Cell, removeValues: number[]) {
-    removeValues.forEach(value => {
-      cell.topLeftEdgeCount.delete(value);
-      cell.topRightEdgeCount.delete(value);
-      cell.bottomLeftEdgeCount.delete(value);
-      cell.bottomRightEdgeCount.delete(value);
-    });
-  }
-
-  private areEqual(set: Set<number>, array: number[]): boolean {
-    if (set.size === array.length) {
-      for (const setValue of Array.from(set)) {
-        if (array.find(arrayValue => arrayValue === setValue) === undefined) {
-          return false;
-        };
-      }
-      for (const arrayValue of array) {
-        if (!set.has(arrayValue)) {
-          return false;
-        }
-      }
-      return true;
-    }
-    return false;
-  }
-
-  // returns true if any edge count is modified
-  private applyEdgeCountRule(item: IEdgeCount, edgeCount: number[], removeDiagonal: number[] = [], removeAdjacent: number[] = []): boolean {
-    let modified = false;
-
-    if (this.areEqual(item.topLeftEdgeCount, edgeCount)) {
-      removeDiagonal.forEach(value => {
-        modified = item.bottomRightEdgeCount.delete(value) || modified;
-      });
-      removeAdjacent.forEach(value => {
-        modified = item.bottomLeftEdgeCount.delete(value) || modified;
-        modified = item.topRightEdgeCount.delete(value) || modified;
-      });
-    }
-    if (this.areEqual(item.topRightEdgeCount, edgeCount)) {
-      removeDiagonal.forEach(value => {
-        modified = item.bottomLeftEdgeCount.delete(value) || modified;
-      });
-      removeAdjacent.forEach(value => {
-        modified = item.topLeftEdgeCount.delete(value) || modified;
-        modified = item.bottomRightEdgeCount.delete(value) || modified;
-      });
-    }
-    if (this.areEqual(item.bottomLeftEdgeCount, edgeCount)) {
-      removeDiagonal.forEach(value => {
-        modified = item.topRightEdgeCount.delete(value) || modified;
-      });
-      removeAdjacent.forEach(value => {
-        modified = item.topLeftEdgeCount.delete(value) || modified;
-        modified = item.bottomRightEdgeCount.delete(value) || modified;
-      });
-    }
-    if (this.areEqual(item.bottomRightEdgeCount, edgeCount)) {
-      removeDiagonal.forEach(value => {
-        modified = item.topLeftEdgeCount.delete(value) || modified;
-      });
-      removeAdjacent.forEach(value => {
-        modified = item.bottomLeftEdgeCount.delete(value) || modified;
-        modified = item.topRightEdgeCount.delete(value) || modified;
-      });
-    }
-
-    return modified;
-  }
-
-  private cloneSet(source: Set<number>, target: Set<number>) {
-    target.clear();
-    source.forEach(value => {
-      target.add(value);
-    });
   }
 }
 

@@ -18,18 +18,7 @@ const SlitherlinkGame = (props: IProps) => {
 
   for (let row = 0; row < game.board.rows; row++) {
     for (let col = 0; col < game.board.columns; col++) {
-      content.push(
-        <Corner
-          key={`corner-'${row}-${col}`}
-          row={row}
-          col={col}
-          rows={game.board.rows}
-          topLeftValue={Array.from(game.board.corners[row][col].topLeftEdgeCount).join(' ')}
-          topRightValue={Array.from(game.board.corners[row][col].topRightEdgeCount).join(' ')}
-          bottomLeftValue={Array.from(game.board.corners[row][col].bottomLeftEdgeCount).join(' ')}
-          bottomRightValue={Array.from(game.board.corners[row][col].bottomRightEdgeCount).join(' ')}
-          showCornerValues={game.debugLevel > 0}
-        />);
+      content.push(<Corner key={`corner-'${row}-${col}`} row={row} col={col} />);
       content.push(
         <HEdge
           key={`hedge-${row}-${col}`}
@@ -39,17 +28,7 @@ const SlitherlinkGame = (props: IProps) => {
           handleContextMenu={game.handleHEdgeContextMenu} />
       );
     }
-    content.push(
-      <Corner
-        key={`corner-${row}-${game.board.columns}`}
-        row={row} col={game.board.columns}
-        rows={game.board.rows}
-        topLeftValue={Array.from(game.board.corners[row][game.board.columns].topLeftEdgeCount).join(' ')}
-        topRightValue={Array.from(game.board.corners[row][game.board.columns].topRightEdgeCount).join(' ')}
-        bottomLeftValue={Array.from(game.board.corners[row][game.board.columns].bottomLeftEdgeCount).join(' ')}
-        bottomRightValue={Array.from(game.board.corners[row][game.board.columns].bottomRightEdgeCount).join(' ')}
-        showCornerValues={game.debugLevel > 0}
-      />);
+    content.push(<Corner key={`corner-${row}-${game.board.columns}`} row={row} col={game.board.columns} />);
 
     for (let col = 0; col < game.board.columns; col++) {
       content.push(
@@ -87,17 +66,7 @@ const SlitherlinkGame = (props: IProps) => {
     );
   }
   for (let col = 0; col < game.board.columns; col++) {
-    content.push(
-      <Corner
-        key={`corner-${game.board.rows}-${col}`}
-        row={game.board.rows} col={col}
-        rows={game.board.rows}
-        topLeftValue={Array.from(game.board.corners[game.board.rows][col].topLeftEdgeCount).join(' ')}
-        topRightValue={Array.from(game.board.corners[game.board.rows][col].topRightEdgeCount).join(' ')}
-        bottomLeftValue={Array.from(game.board.corners[game.board.rows][col].bottomLeftEdgeCount).join(' ')}
-        bottomRightValue={Array.from(game.board.corners[game.board.rows][col].bottomRightEdgeCount).join(' ')}
-        showCornerValues={game.debugLevel > 0}
-      />);
+    content.push(<Corner key={`corner-${game.board.rows}-${col}`} row={game.board.rows} col={col} />);
     content.push(
       <HEdge
         key={`hedge-${game.board.rows}-${col}`}
@@ -107,17 +76,7 @@ const SlitherlinkGame = (props: IProps) => {
         handleContextMenu={game.handleHEdgeContextMenu} />
     );
   }
-  content.push(
-    <Corner
-      key={`corner-${game.board.rows}-${game.board.columns}`}
-      row={game.board.rows} col={game.board.columns}
-      rows={game.board.rows}
-      topLeftValue={Array.from(game.board.corners[game.board.rows][game.board.columns].topLeftEdgeCount).join(' ')}
-      topRightValue={Array.from(game.board.corners[game.board.rows][game.board.columns].topRightEdgeCount).join(' ')}
-      bottomLeftValue={Array.from(game.board.corners[game.board.rows][game.board.columns].bottomLeftEdgeCount).join(' ')}
-      bottomRightValue={Array.from(game.board.corners[game.board.rows][game.board.columns].bottomRightEdgeCount).join(' ')}
-      showCornerValues={game.debugLevel > 0}
-    />);
+  content.push(<Corner key={`corner-${game.board.rows}-${game.board.columns}`} row={game.board.rows} col={game.board.columns} />);
 
   const boardStyle: Record<string, any> = {
     gridTemplateColumns: '20fr 100fr '.repeat(game.board.columns).concat('20fr'),

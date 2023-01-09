@@ -5111,7 +5111,7 @@ describe('one solution boards', () => {
       ['', '3', '1', '', '1', '', '', '', '2', '2'],
       ['3', '', '3', '', '', '', '2', '3', '', '1'],
     ];
-    const board = new SlitherlinkBoard(values);
+    const board = new SlitherlinkBoard(values, 2);
     board.solve();
   });
 
