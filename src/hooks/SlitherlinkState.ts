@@ -163,7 +163,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   }
 
   const checkIfSolved = () => {
-    if (board.isSolved()) {
+    if (board.runSolvedCheck()) {
       setDialog('solved');
       setStatus('solved');
     }
