@@ -6,34 +6,42 @@ export interface IQuote {
 interface IProps {
   message: string;
   quote?: IQuote;
-  buttons: string[];
-  handleButtonClick(button: string): void;
+  imagePath?: string;
+  buttons?: string[];
+  handleButtonClick?(button: string): void;
 }
 
 const Dialog = (props: IProps) => {
-  const { message, quote, buttons, handleButtonClick } = props;
+  const { message, quote, imagePath, buttons, handleButtonClick } = props;
 
   const content: JSX.Element[] = [];
-  buttons.forEach((button, index) => {
-    content.push(<button key={button} onClick={() => handleButtonClick(button)} autoFocus={index === 0}>{button}</button>);
-  });
+  if (buttons && handleButtonClick) {
+    buttons.forEach((button, index) => {
+      content.push(<button key={button} onClick={() => handleButtonClick(button)} autoFocus={index === 0}>{button}</button>);
+    });
+  }
 
   return (
     <div className='dialogBackground'>
       <div className='dialog'>
-        <pre>
-          {message}
-        </pre>
-        {quote && <div className='quoteBlock'>
-          <div className='quote'>
-            {quote.quote}
-          </div>
-          <div className='quoteAuthor'>
-            {`\u2013 ${quote.author}`}
-          </div>
+        {imagePath && <div className='dialogImage'>
+          <img src={imagePath} alt='wait...' />
         </div>}
-        <div className='buttonRow'>
-          {content}
+        <div className='dialogContent'>
+          <pre>
+            {message}
+          </pre>
+          {quote && <div className='quoteBlock'>
+            <div className='quote'>
+              {quote.quote}
+            </div>
+            <div className='quoteAuthor'>
+              {`\u2013 ${quote.author}`}
+            </div>
+          </div>}
+          {buttons && <div className='buttonRow'>
+            {content}
+          </div>}
         </div>
       </div>
     </div>

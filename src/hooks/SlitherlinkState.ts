@@ -96,23 +96,38 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   const [quote, setQuote] = useState<IQuote>({ quote: '', author: '' });
 
   useEffect(() => {
-    if (quote.quote === '') {
-      getQuote();
+    let ignore = false;
+    fetch('https://api.quotable.io/random')
+      .then(response => response.json())
+      .then(json => {
+        if (!ignore) {
+          setQuote({
+            quote: json.content,
+            author: json.author
+          });
+        }
+      })
+      .catch(e => console.error(e));
+    return () => {
+      ignore = true;
     }
-  }, [quote]);
+  }, []);
 
-  const getQuote = async () => {
-    try {
-      const response = await fetch('https://api.quotable.io/random');
-      const data = await response.json();
-      setQuote({
-        quote: data.content,
-        author: data.author
+  useEffect(() => {
+    if (dialog === 'solving') {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            board.solve().then(() => {
+              setStatus('solved');
+              setBoard(Object.create(board));
+              setDialog('');
+            });
+          }, 0);
+        });
       });
-    } catch (e) {
-      console.error(e);
     }
-  }
+  }, [dialog]);
 
   const handleVEdgeClick = (row: number, col: number) => {
     board.vEdges[row][col].value = (board.vEdges[row][col].value === '-' ? '' : '-');
@@ -155,11 +170,10 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
 
   const handleSolveConfirm = (button: string) => {
     if (button === 'OK') {
-      board.solve();
-      setStatus('solved');
-      setBoard(Object.create(board));
+      setDialog('solving');
+    } else {
+      setDialog('');
     }
-    setDialog('');
   }
 
   const checkIfSolved = () => {

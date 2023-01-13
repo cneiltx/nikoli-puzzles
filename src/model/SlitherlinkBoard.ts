@@ -302,23 +302,26 @@ class SlitherlinkBoard {
   }
 
   solve() {
-    this.resetBoard();
+    return new Promise<void>(resolve => {
+      this.resetBoard();
 
-    if (this.debugLevel > 1) {
-      console.log('Initial state:\n' + this.prettyPrint());
-    }
+      if (this.debugLevel > 1) {
+        console.log('Initial state:\n' + this.prettyPrint());
+      }
 
-    this.runOneTimeSolvePass();
+      this.runOneTimeSolvePass();
 
-    const result = this.recursiveSolve(0);
+      const result = this.recursiveSolve(0);
 
-    if (result.solutions === 0) {
-      throw new NoSolutionError();
-    } else {
-      this.apply(result.board);
-    }
+      if (result.solutions === 0) {
+        throw new NoSolutionError();
+      } else {
+        this.apply(result.board);
+      }
 
-    this.removeDeletedEdges();
+      this.removeDeletedEdges();
+      resolve();
+    });
   }
 
   private recursiveSolve(depth: number): IRecursiveSolveResult {

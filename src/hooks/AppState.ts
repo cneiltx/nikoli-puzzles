@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface IAppState {
   game: string;
@@ -17,6 +17,10 @@ const AppState = (): IAppState => {
   const [rows, setRows] = useState(0);
   const [status, setStatus] = useState('new');
   const [dialog, setDialog] = useState('');
+
+  useEffect(() => {
+    new Image().src = process.env.PUBLIC_URL + '/rubiks-cube-loader.gif';
+  }, []);
 
   const handleStart = (game: string, rows: number, columns: number) => {
     setGame(game);

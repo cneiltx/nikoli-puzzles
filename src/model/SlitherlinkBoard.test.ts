@@ -5050,27 +5050,27 @@ describe('every corner must have exactly 0 or 2 connected edges', () => {
 });
 
 describe('no or multiple solutions', () => {
-  it('no solution', () => {
+  it('no solution', async () => {
     const values = [
       ['1', '1'],
       ['1', '1']
     ];
     const board = new SlitherlinkBoard(values);
-    expect(() => board.solve()).toThrow(NoSolutionError);
+    await expect(board.solve()).rejects.toThrow(NoSolutionError);
   });
 
-  it('two solutions', () => {
+  it('two solutions', async () => {
     const values = [
       ['3', '2'],
       ['2', '3']
     ];
     const board = new SlitherlinkBoard(values);
-    expect(() => board.solve()).toThrow(MultipleSolutionsError);
+    await expect(board.solve()).rejects.toThrow(MultipleSolutionsError);
   });
 });
 
 describe('one solution boards', () => {
-  it('7 x 7 easy', () => {
+  it('7 x 7 easy', async () => {
     const values = [
       ['2', '2', '2', '3', '3', '1', ''],
       ['', '', '0', '2', '', '3', ''],
@@ -5081,10 +5081,10 @@ describe('one solution boards', () => {
       ['3', '', '2', '', '', '3', '']
     ];
     const board = new SlitherlinkBoard(values);
-    board.solve();
+    await board.solve();
   });
 
-  it('7 x 7 hard', () => {
+  it('7 x 7 hard', async () => {
     const values = [
       ['', '3', '', '2', '2', '', '1'],
       ['3', '1', '2', '1', '2', '', ''],
@@ -5095,10 +5095,10 @@ describe('one solution boards', () => {
       ['', '', '3', '2', '2', '2', '3'],
     ];
     const board = new SlitherlinkBoard(values);
-    board.solve();
+    await board.solve();
   });
 
-  it('10 x 10 hard', () => {
+  it('10 x 10 hard', async () => {
     const values = [
       ['', '', '3', '', '2', '', '', '3', '', '3'],
       ['3', '2', '', '', '', '', '2', '', '1', '3'],
@@ -5111,11 +5111,11 @@ describe('one solution boards', () => {
       ['', '3', '1', '', '1', '', '', '', '2', '2'],
       ['3', '', '3', '', '', '', '2', '3', '', '1'],
     ];
-    const board = new SlitherlinkBoard(values, 2);
-    board.solve();
+    const board = new SlitherlinkBoard(values);
+    await board.solve();
   });
 
-  it('24 x 12 hard', () => {
+  it('24 x 12 hard', async () => {
     const values = [
       ['2', '2', '', '', '3', '', '', '', '3', '', '', '', '1', '3', '2', '2', '', '', '3', '', '', '2', '3', ''],
       ['3', '', '2', '1', '', '', '3', '1', '', '1', '2', '3', '', '3', '', '2', '', '2', '', '3', '2', '', '2', ''],
@@ -5131,10 +5131,10 @@ describe('one solution boards', () => {
       ['3', '1', '', '', '', '', '', '3', '', '', '1', '', '', '2', '', '', '1', '', '', '2', '', '2', '', ''],
     ];
     const board = new SlitherlinkBoard(values);
-    board.solve();
+    await board.solve();
   });
 
-  it('20 x 20 hard', () => {
+  it('20 x 20 hard', async () => {
     const values = [
       ['2', '', '', '', '', '2', '', '2', '', '1', '', '2', '', '2', '2', '', '3', '3', '', ''],
       ['', '', '2', '', '3', '', '', '', '3', '', '3', '2', '', '', '', '', '1', '', '1', '2'],
@@ -5158,6 +5158,6 @@ describe('one solution boards', () => {
       ['3', '', '2', '1', '', '', '', '', '2', '2', '', '', '', '2', '2', '', '', '3', '2', '']
     ];
     const board = new SlitherlinkBoard(values);
-    board.solve();
+    await board.solve();
   });
 });

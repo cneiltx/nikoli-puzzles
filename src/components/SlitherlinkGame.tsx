@@ -107,6 +107,8 @@ const SlitherlinkGame = (props: IProps) => {
         <Dialog message='Are you sure you want to see the solution?' buttons={['OK', 'Cancel']} handleButtonClick={game.handleSolveConfirm} />}
       {game.dialog === 'solved' &&
         <Dialog message='Congratulations, you solved it!' quote={game.quote} buttons={['OK']} handleButtonClick={game.handleSolvedConfirm} />}
+      {game.dialog === 'solving' &&
+        <Dialog message='Solving...' imagePath={process.env.PUBLIC_URL + '/rubiks-cube-loader.gif'} />}
     </div>
   );
 };
