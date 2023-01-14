@@ -20,24 +20,24 @@ const SlitherlinkGame = (props: IProps) => {
     for (let col = 0; col < game.board.columns; col++) {
       content.push(<Corner key={`corner-'${row}-${col}`} row={row} col={col} />);
       content.push(
-        <HEdge
-          key={`hedge-${row}-${col}`}
+        <VEdge
+          key={`vedge-${row}-${col}`}
           row={row} col={col}
           value={game.board.vEdges[row][col].value}
-          handleClick={game.handleHEdgeClick}
-          handleContextMenu={game.handleHEdgeContextMenu} />
+          handleClick={game.handleVEdgeClick}
+          handleContextMenu={game.handleVEdgeContextMenu} />
       );
     }
     content.push(<Corner key={`corner-${row}-${game.board.columns}`} row={row} col={game.board.columns} />);
 
     for (let col = 0; col < game.board.columns; col++) {
       content.push(
-        <VEdge
-          key={`vedge-${row}-${col}`}
+        <HEdge
+          key={`hedge-${row}-${col}`}
           row={row} col={col}
           value={game.board.hEdges[row][col].value}
-          handleClick={game.handleVEdgeClick}
-          handleContextMenu={game.handleVEdgeContextMenu} />
+          handleClick={game.handleHEdgeClick}
+          handleContextMenu={game.handleHEdgeContextMenu} />
       );
       content.push(
         <Cell
@@ -57,23 +57,23 @@ const SlitherlinkGame = (props: IProps) => {
       );
     }
     content.push(
-      <VEdge
-        key={`vedge-${row}-${game.board.columns}`}
+      <HEdge
+        key={`hedge-${row}-${game.board.columns}`}
         row={row} col={game.board.columns}
         value={game.board.hEdges[row][game.board.columns].value}
-        handleClick={game.handleVEdgeClick}
-        handleContextMenu={game.handleVEdgeContextMenu} />
+        handleClick={game.handleHEdgeClick}
+        handleContextMenu={game.handleHEdgeContextMenu} />
     );
   }
   for (let col = 0; col < game.board.columns; col++) {
     content.push(<Corner key={`corner-${game.board.rows}-${col}`} row={game.board.rows} col={col} />);
     content.push(
-      <HEdge
-        key={`hedge-${game.board.rows}-${col}`}
+      <VEdge
+        key={`vedge-${game.board.rows}-${col}`}
         row={game.board.rows} col={col}
         value={game.board.vEdges[game.board.rows][col].value}
-        handleClick={game.handleHEdgeClick}
-        handleContextMenu={game.handleHEdgeContextMenu} />
+        handleClick={game.handleVEdgeClick}
+        handleContextMenu={game.handleVEdgeContextMenu} />
     );
   }
   content.push(<Corner key={`corner-${game.board.rows}-${game.board.columns}`} row={game.board.rows} col={game.board.columns} />);
@@ -84,7 +84,7 @@ const SlitherlinkGame = (props: IProps) => {
     aspectRatio: `${game.board.columns} / ${game.board.rows}`,
   };
 
-  if (game.status === 'solved' || game.dialog !== '') {
+  if (game.status === 'solved') {
     boardStyle.pointerEvents = 'none';
   }
 
@@ -97,17 +97,17 @@ const SlitherlinkGame = (props: IProps) => {
         {content}
       </div>
       <div className='buttonRow'>
-        <button onClick={handleNewGame} disabled={game.dialog !== ''}>New Game</button>
-        <button onClick={game.handleReset} disabled={game.dialog !== ''}>Reset</button>
-        <button onClick={game.handleSolve} disabled={game.dialog !== '' || game.status === 'solved'}>Solve</button>
+        <button onClick={handleNewGame} disabled={!['playing', 'solved'].includes(game.status)}>New Game</button>
+        <button onClick={game.handleResetRequest} disabled={!['playing', 'solved'].includes(game.status)}>Reset</button>
+        <button onClick={game.handleSolveRequest} disabled={game.status !== 'playing'}>Solve</button>
       </div>
-      {game.dialog === 'reset' &&
+      {game.status === 'resetRequest' &&
         <Dialog message='Are you sure you want to reset the game?' buttons={['OK', 'Cancel']} handleButtonClick={game.handleResetConfirm} />}
-      {game.dialog === 'solve' &&
+      {game.status === 'solveRequest' &&
         <Dialog message='Are you sure you want to see the solution?' buttons={['OK', 'Cancel']} handleButtonClick={game.handleSolveConfirm} />}
-      {game.dialog === 'solved' &&
-        <Dialog message='Congratulations, you solved it!' quote={game.quote} buttons={['OK']} handleButtonClick={game.handleSolvedConfirm} />}
-      {game.dialog === 'solving' &&
+      {game.status === 'userSolved' &&
+        <Dialog message='Congratulations, you solved it!' quote={game.quote} buttons={['OK']} handleButtonClick={game.handleUserSolvedConfirm} />}
+      {game.status === 'autoSolving' &&
         <Dialog message='Solving...' imagePath={process.env.PUBLIC_URL + '/rubiks-cube-loader.gif'} />}
     </div>
   );

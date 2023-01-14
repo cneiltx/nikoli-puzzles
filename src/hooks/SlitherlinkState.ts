@@ -1,22 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SlitherlinkBoard from '../model/SlitherlinkBoard';
 import { IQuote } from '../components/Dialog';
 
 interface ISlitherlinkState {
   board: SlitherlinkBoard;
   status: string;
-  dialog: string;
   quote: IQuote;
   debugLevel: number;
   handleHEdgeClick: (row: number, col: number) => void;
   handleHEdgeContextMenu: (row: number, col: number) => void;
   handleVEdgeClick: (row: number, col: number) => void;
   handleVEdgeContextMenu: (row: number, col: number) => void;
-  handleReset: () => void;
+  handleResetRequest: () => void;
   handleResetConfirm: (button: string) => void;
-  handleSolve: () => void;
+  handleSolveRequest: () => void;
   handleSolveConfirm: (button: string) => void;
-  handleSolvedConfirm: (button: string) => void;
+  handleUserSolvedConfirm: (button: string) => void;
 }
 
 const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
@@ -91,8 +90,16 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
 
   const debugLevel = 0;
   const [board, setBoard] = useState(new SlitherlinkBoard(twentyFourByTwelveHard, debugLevel));
+
+  // status values
+  //   playing - user is working on the puzzle
+  //   resetRequest - user requested to reset the board
+  //   solveRequest - user requested to auto solve the board
+  //   autoSolving - board is being auto solved
+  //   userSolved - user just solved the puzzle (and needs to be informed)
+  //   solved - board has been solved (either by user or auto solved)
   const [status, setStatus] = useState('playing');
-  const [dialog, setDialog] = useState('');
+
   const [quote, setQuote] = useState<IQuote>({ quote: '', author: '' });
 
   useEffect(() => {
@@ -114,20 +121,29 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   }, []);
 
   useEffect(() => {
-    if (dialog === 'solving') {
+    if (status === 'autoSolving') {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           setTimeout(() => {
             board.solve().then(() => {
               setStatus('solved');
               setBoard(Object.create(board));
-              setDialog('');
             });
           }, 0);
         });
       });
     }
-  }, [dialog]);
+  }, [status]);
+
+  const usePreviousValue = <T>(value: T) => {
+    const ref = useRef<T>();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  };
+
+  const previousStatus = usePreviousValue(status);
 
   const handleVEdgeClick = (row: number, col: number) => {
     board.vEdges[row][col].value = (board.vEdges[row][col].value === '-' ? '' : '-');
@@ -151,8 +167,8 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
     setBoard(Object.create(board));
   }
 
-  const handleReset = () => {
-    setDialog('reset');
+  const handleResetRequest = () => {
+    setStatus('resetRequest');
   };
 
   const handleResetConfirm = (button: string) => {
@@ -160,48 +176,47 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
       board.resetBoard();
       setBoard(Object.create(board));
       setStatus('playing');
+    } else {
+      setStatus(previousStatus ?? 'playing');
     }
-    setDialog('');
   }
 
-  const handleSolve = () => {
-    setDialog('solve');
+  const handleSolveRequest = () => {
+    setStatus('solveRequest');
   };
 
   const handleSolveConfirm = (button: string) => {
     if (button === 'OK') {
-      setDialog('solving');
+      setStatus('autoSolving');
     } else {
-      setDialog('');
+      setStatus(previousStatus ?? 'playing');
     }
   }
 
   const checkIfSolved = () => {
-    if (board.runSolvedCheck()) {
-      setDialog('solved');
-      setStatus('solved');
+    if (board.runSolvedCheck().isSolved) {
+      setStatus('userSolved');
     }
   };
 
-  const handleSolvedConfirm = (button: string) => {
-    setDialog('');
+  const handleUserSolvedConfirm = (button: string) => {
+    setStatus('solved');
   }
 
   return {
     board,
     status,
-    dialog,
     quote,
     debugLevel,
     handleHEdgeClick,
     handleHEdgeContextMenu,
     handleVEdgeClick,
     handleVEdgeContextMenu,
-    handleReset,
+    handleResetRequest,
     handleResetConfirm,
-    handleSolve,
+    handleSolveRequest,
     handleSolveConfirm,
-    handleSolvedConfirm
+    handleUserSolvedConfirm
   };
 }
 
