@@ -1,17 +1,7 @@
 import { useEffect, useState } from 'react';
+import { IAppState } from './IAppState';
 
-interface IAppState {
-  game: string;
-  rows: number;
-  columns: number;
-  status: string;
-  dialog: string;
-  handleStart: (game: string, rows: number, columns: number) => void;
-  handleNewGame: () => void;
-  handleNewGameConfirm: (button: string) => void;
-}
-
-const AppState = (): IAppState => {
+export const AppState = (): IAppState => {
   const [game, setGame] = useState('');
   const [columns, setColumns] = useState(0);
   const [rows, setRows] = useState(0);
@@ -42,5 +32,3 @@ const AppState = (): IAppState => {
 
   return { game, rows, columns, status, dialog, handleStart, handleNewGame, handleNewGameConfirm };
 };
-
-export default AppState;

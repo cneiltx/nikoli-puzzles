@@ -1,8 +1,8 @@
-import Corner from './Corner';
-import Cell from './Cell';
-import VEdge from './VEdge';
+import { Corner } from './Corner';
+import { Cell } from './Cell';
+import { VEdge } from './VEdge';
 
-class HEdge {
+export class HEdge {
   row: number;
   col: number;
   value: string;
@@ -46,42 +46,26 @@ class HEdge {
   }
 
   get topPath(): VEdge | HEdge | null {
-    let pathCount = 0;
-    let path = null;
     if (this.topLeftEdge?.value === '-') {
-      pathCount++;
-      path = this.topLeftEdge;
+      return this.topLeftEdge;
+    } else if (this.topEdge?.value === '-') {
+      return this.topEdge;
+    } else if (this.topRightEdge?.value === '-') {
+      return this.topRightEdge;
+    } else {
+      return null;
     }
-    if (this.topEdge?.value === '-') {
-      pathCount++;
-      path = this.topEdge;
-    }
-    if (this.topRightEdge?.value === '-') {
-      pathCount++;
-      path = this.topRightEdge;
-    }
-    if (pathCount !== 1) return null;
-    return path;
   }
 
   get bottomPath(): VEdge | HEdge | null {
-    let pathCount = 0;
-    let path = null;
     if (this.bottomLeftEdge?.value === '-') {
-      pathCount++;
-      path = this.bottomLeftEdge;
+      return this.bottomLeftEdge;
+    } else if (this.bottomEdge?.value === '-') {
+      return this.bottomEdge;
+    } else if (this.bottomRightEdge?.value === '-') {
+      return this.bottomRightEdge;
+    } else {
+      return null;
     }
-    if (this.bottomEdge?.value === '-') {
-      pathCount++;
-      path = this.bottomEdge;
-    }
-    if (this.bottomRightEdge?.value === '-') {
-      pathCount++;
-      path = this.bottomRightEdge;
-    }
-    if (pathCount !== 1) return null;
-    return path;
   }
 }
-
-export default HEdge;

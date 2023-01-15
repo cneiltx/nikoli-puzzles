@@ -1,23 +1,7 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { ICellProps } from './ICellProps';
 
-interface IProps {
-  row: number;
-  col: number;
-  rows: number;
-  value?: string;
-  handleClick?(row: number, col: number): void;
-  handleClickTop(row: number, col: number): void;
-  handleClickBottom(row: number, col: number): void;
-  handleClickLeft(row: number, col: number): void;
-  handleClickRight(row: number, col: number): void;
-  handleContextMenu?(row: number, col: number): void;
-  handleContextMenuTop(row: number, col: number): void;
-  handleContextMenuBottom(row: number, col: number): void;
-  handleContextMenuLeft(row: number, col: number): void;
-  handleContextMenuRight(row: number, col: number): void;
-}
-
-const Cell = (props: IProps) => {
+export const Cell = (props: ICellProps) => {
   const {
     row,
     col,
@@ -55,9 +39,9 @@ const Cell = (props: IProps) => {
         fontSize: `${35 / rows}vh`,
       }}
       onClick={(e) => {
-        let target = e.target as HTMLDivElement;
-        let mouseX = e.clientX - target.offsetLeft;
-        let mouseY = e.clientY - target.offsetTop;
+        const target = e.target as HTMLDivElement;
+        const mouseX = e.clientX - target.offsetLeft;
+        const mouseY = e.clientY - target.offsetTop;
 
         if (mouseY / height < .25 && mouseX / width > .25 && mouseX / width < .75) {
           handleClickTop(row, col);
@@ -74,9 +58,9 @@ const Cell = (props: IProps) => {
       onContextMenu={(e) => {
         e.preventDefault();
 
-        let target = e.target as HTMLDivElement;
-        let mouseX = e.clientX - target.offsetLeft;
-        let mouseY = e.clientY - target.offsetTop;
+        const target = e.target as HTMLDivElement;
+        const mouseX = e.clientX - target.offsetLeft;
+        const mouseY = e.clientY - target.offsetTop;
 
         if (mouseY / height < .25 && mouseX / width > .25 && mouseX / width < .75) {
           handleContextMenuTop(row, col);
@@ -96,5 +80,3 @@ const Cell = (props: IProps) => {
     </div>
   );
 };
-
-export default Cell;

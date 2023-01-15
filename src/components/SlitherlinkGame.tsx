@@ -1,17 +1,12 @@
-import Cell from './Cell';
-import Corner from './Corner';
-import Dialog from './Dialog';
-import HEdge from './HEdge';
-import VEdge from './VEdge';
-import SlitherlinkState from '../hooks/SlitherlinkState';
+import { Cell } from './Cell';
+import { Corner } from './Corner';
+import { Dialog } from './Dialog';
+import { HEdge } from './HEdge';
+import { VEdge } from './VEdge';
+import { SlitherlinkState } from '../hooks/SlitherlinkState';
+import { ISlitherlinkGameProps } from './ISlitherlinkGameProps';
 
-interface IProps {
-  rows: number;
-  columns: number;
-  handleNewGame(): void;
-}
-
-const SlitherlinkGame = (props: IProps) => {
+export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
   const { rows, columns, handleNewGame } = props;
   const game = SlitherlinkState(rows, columns);
   const content = [];
@@ -112,5 +107,3 @@ const SlitherlinkGame = (props: IProps) => {
     </div>
   );
 };
-
-export default SlitherlinkGame;

@@ -1,9 +1,9 @@
-import Dialog from './components/Dialog';
-import Game from './pages/Game';
-import Start from './pages/Start';
-import AppState from './hooks/AppState';
+import { Dialog } from './components/Dialog';
+import { Game } from './pages/Game';
+import { Start } from './pages/Start';
+import { AppState } from './hooks/AppState';
 
-const App = () => {
+export const App = () => {
   const app = AppState();
   return (
     <div className='app'>
@@ -14,5 +14,3 @@ const App = () => {
     </div>
   );
 }
-
-export default App;

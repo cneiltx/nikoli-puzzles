@@ -1,8 +1,8 @@
-import Corner from './Corner';
-import Cell from './Cell';
-import HEdge from './HEdge';
+import { Corner } from './Corner';
+import { Cell } from './Cell';
+import { HEdge } from './HEdge';
 
-class VEdge {
+export class VEdge {
   row: number;
   col: number;
   value: string;
@@ -69,5 +69,3 @@ class VEdge {
     }
   }
 }
-
-export default VEdge;

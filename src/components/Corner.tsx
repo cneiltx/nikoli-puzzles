@@ -1,12 +1,6 @@
-interface IProps {
-  row: number;
-  col: number;
-  value?: string;
-  handleClick?(row: number, col: number): void;
-  handleContextMenu?(row: number, col: number): void;
-}
+import { ICornerProps } from "./ICornerProps";
 
-const Corner = (props: IProps) => {
+export const Corner = (props: ICornerProps) => {
   const {
     row,
     col,
@@ -28,5 +22,3 @@ const Corner = (props: IProps) => {
     </div>
   );
 };
-
-export default Corner;

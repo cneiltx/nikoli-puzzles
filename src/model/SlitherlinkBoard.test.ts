@@ -1,6 +1,6 @@
-import MultipleSolutionsError from './MultipleSolutionsError';
-import NoSolutionError from './NoSolutionError';
-import SlitherlinkBoard from './SlitherlinkBoard';
+import { MultipleSolutionsError } from './MultipleSolutionsError';
+import { NoSolutionError } from './NoSolutionError';
+import { SlitherlinkBoard } from './SlitherlinkBoard';
 
 describe('invalid board initialization', () => {
   it('different row lengths', () => {

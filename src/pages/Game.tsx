@@ -1,13 +1,7 @@
-import SlitherlinkGame from '../components/SlitherlinkGame';
+import { SlitherlinkGame } from '../components/SlitherlinkGame';
+import { IGameProps } from './IGameProps';
 
-interface IProps {
-  game: string;
-  columns: number;
-  rows: number;
-  handleNewGame(): void;
-}
-
-const Game = (props: IProps) => {
+export const Game = (props: IGameProps) => {
   const { game, columns, rows, handleNewGame } = props;
 
   return (
@@ -17,5 +11,3 @@ const Game = (props: IProps) => {
     </div>
   );
 }
-
-export default Game;

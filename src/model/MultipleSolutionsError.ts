@@ -1,4 +1,2 @@
-class MultipleSolutionsError extends Error {
+export class MultipleSolutionsError extends Error {
 }
-
-export default MultipleSolutionsError;

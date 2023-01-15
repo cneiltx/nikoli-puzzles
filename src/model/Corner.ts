@@ -1,8 +1,8 @@
-import Cell from './Cell';
-import VEdge from './VEdge';
-import HEdge from './HEdge';
+import { Cell } from './Cell';
+import { VEdge } from './VEdge';
+import { HEdge } from './HEdge';
 
-class Corner {
+export class Corner {
   row: number;
   col: number;
   value: string;
@@ -84,5 +84,3 @@ class Corner {
     return this.edges.filter(edge => edge.value === '');
   }
 }
-
-export default Corner;

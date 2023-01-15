@@ -1,4 +1,2 @@
-class NoSolutionError extends Error {
+export class NoSolutionError extends Error {
 }
-
-export default NoSolutionError;

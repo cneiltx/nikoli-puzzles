@@ -1,10 +1,7 @@
 import { useState, FormEvent } from 'react';
+import { IStartProps } from './IStartProps';
 
-interface IProps {
-  handleStart(game: string, columns: number, rows: number): void;
-}
-
-const Start = (props: IProps) => {
+export const Start = (props: IStartProps) => {
   const { handleStart } = props;
   const [game, setGame] = useState('Slitherlink');
   const [boardSize, setBoardSize] = useState('7x7');
@@ -19,8 +16,8 @@ const Start = (props: IProps) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let columns = +boardSize.substring(0, boardSize.indexOf('x'));
-    let rows = +boardSize.substring(boardSize.indexOf('x') + 1);
+    const columns = +boardSize.substring(0, boardSize.indexOf('x'));
+    const rows = +boardSize.substring(boardSize.indexOf('x') + 1);
     handleStart(game, columns, rows);
   }
 
@@ -50,5 +47,3 @@ const Start = (props: IProps) => {
     </form>
   );
 };
-
-export default Start;

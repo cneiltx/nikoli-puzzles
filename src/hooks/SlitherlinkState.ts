@@ -1,24 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import SlitherlinkBoard from '../model/SlitherlinkBoard';
-import { IQuote } from '../components/Dialog';
+import { SlitherlinkBoard } from '../model/SlitherlinkBoard';
+import { IQuote } from "../components/IQuote";
+import { ISlitherlinkState } from './ISlitherlinkState';
 
-interface ISlitherlinkState {
-  board: SlitherlinkBoard;
-  status: string;
-  quote: IQuote;
-  debugLevel: number;
-  handleHEdgeClick: (row: number, col: number) => void;
-  handleHEdgeContextMenu: (row: number, col: number) => void;
-  handleVEdgeClick: (row: number, col: number) => void;
-  handleVEdgeContextMenu: (row: number, col: number) => void;
-  handleResetRequest: () => void;
-  handleResetConfirm: (button: string) => void;
-  handleSolveRequest: () => void;
-  handleSolveConfirm: (button: string) => void;
-  handleUserSolvedConfirm: (button: string) => void;
-}
-
-const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
+export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   const sixBySixHard = [
     ['', '', '', '', '0', ''],
     ['3', '3', '', '', '1', ''],
@@ -89,7 +74,7 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
   ];
 
   const debugLevel = 0;
-  const [board, setBoard] = useState(new SlitherlinkBoard(twentyFourByTwelveHard, debugLevel));
+  const [board, setBoard] = useState(new SlitherlinkBoard(twentyByTwentyHard, debugLevel));
 
   // status values
   //   playing - user is working on the puzzle
@@ -219,5 +204,3 @@ const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
     handleUserSolvedConfirm
   };
 }
-
-export default SlitherlinkState;

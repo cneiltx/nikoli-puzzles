@@ -1,8 +1,8 @@
-import Corner from './Corner';
-import VEdge from './VEdge';
-import HEdge from './HEdge';
+import { Corner } from './Corner';
+import { VEdge } from './VEdge';
+import { HEdge } from './HEdge';
 
-class Cell {
+export class Cell {
   row: number;
   col: number;
   value: string;
@@ -129,5 +129,3 @@ class Cell {
     return this.value === '' || this.includedEdges.length === +this.value;
   }
 }
-
-export default Cell;

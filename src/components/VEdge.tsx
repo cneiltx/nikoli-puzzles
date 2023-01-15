@@ -1,12 +1,6 @@
-interface IProps {
-  row: number;
-  col: number;
-  value?: string;
-  handleClick?(row: number, col: number): void;
-  handleContextMenu?(row: number, col: number): void;
-}
+import { IVEdgeProps } from "./IVEdgeProps";
 
-const VEdge = (props: IProps) => {
+export const VEdge = (props: IVEdgeProps) => {
   const { row, col, value = '', handleClick = (row, col) => { }, handleContextMenu = (row, col) => { } } = props;
 
   const style: Record<string, any> = {};
@@ -30,5 +24,3 @@ const VEdge = (props: IProps) => {
     </div>
   );
 };
-
-export default VEdge;

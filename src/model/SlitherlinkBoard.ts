@@ -1,26 +1,14 @@
-import Cell from './Cell';
-import Corner from './Corner';
-import VEdge from './VEdge';
-import HEdge from './HEdge';
-import MultipleSolutionsError from './MultipleSolutionsError';
-import NoSolutionError from './NoSolutionError';
+import { Cell } from './Cell';
+import { Corner } from './Corner';
+import { VEdge } from './VEdge';
+import { HEdge } from './HEdge';
+import { MultipleSolutionsError } from './MultipleSolutionsError';
+import { NoSolutionError } from './NoSolutionError';
+import { IRecursiveSolveResult } from './IRecursiveSolveResult';
+import { ISolvedCheckResult } from './ISolvedCheckResult';
+import { IMarkEdgeResult } from './IMarkEdgeResult';
 
-interface IRecursiveSolveResult {
-  board: SlitherlinkBoard;
-  solutions: number;
-}
-
-interface ISolvedCheckResult {
-  isValid: boolean;
-  isSolved: boolean;
-}
-
-interface IMarkEdgeResult {
-  isModified: boolean;
-  isConflict: boolean;
-}
-
-class SlitherlinkBoard {
+export class SlitherlinkBoard {
   rows: number;
   columns: number;
   debugLevel: number;
@@ -336,7 +324,7 @@ class SlitherlinkBoard {
       return { board: this, solutions: 0 };
     }
 
-    let solvedResult = this.runSolvedCheck();
+    const solvedResult = this.runSolvedCheck();
 
     if (!solvedResult.isValid) {
       if (this.debugLevel > 0) {
@@ -452,7 +440,7 @@ class SlitherlinkBoard {
       totalEdgeCount += edgeRow.filter(edge => edge.value === '-').length;
     }
 
-    let edgeMap = new Map();
+    const edgeMap = new Map();
 
     // look for closed loops
     while (true) {
@@ -1468,5 +1456,3 @@ class SlitherlinkBoard {
     }
   }
 }
-
-export default SlitherlinkBoard;

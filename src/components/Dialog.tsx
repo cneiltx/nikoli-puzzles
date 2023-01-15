@@ -1,17 +1,6 @@
-export interface IQuote {
-  quote: string;
-  author: string;
-}
+import { IDialogProps } from "./IDialogProps";
 
-interface IProps {
-  message: string;
-  quote?: IQuote;
-  imagePath?: string;
-  buttons?: string[];
-  handleButtonClick?(button: string): void;
-}
-
-const Dialog = (props: IProps) => {
+export const Dialog = (props: IDialogProps) => {
   const { message, quote, imagePath, buttons, handleButtonClick } = props;
 
   const content: JSX.Element[] = [];
@@ -47,5 +36,3 @@ const Dialog = (props: IProps) => {
     </div>
   );
 }
-
-export default Dialog;

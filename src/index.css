@@ -139,10 +139,8 @@ select {
 
 .dialogImage {
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+  width: 10vh;
+  height: 10vh;
 }
 
 .dialogContent {
