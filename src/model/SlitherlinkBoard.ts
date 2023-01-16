@@ -129,81 +129,6 @@ export class SlitherlinkBoard {
     return clone;
   }
 
-  private prettyPrint(): string {
-    let output = '';
-    let row1: string;
-    let row2: string;
-
-    this.cells.forEach((cellRow, rowIndex) => {
-      row1 = '■';
-
-      switch (cellRow[0].leftEdge.value) {
-        case '':
-          row2 = ' ';
-          break;
-        case '-':
-          row2 = '|';
-          break;
-        case 'x':
-          row2 = 'x';
-          break;
-      }
-
-      cellRow.forEach((cell, colIndex) => {
-        switch (cell.topEdge.value) {
-          case '':
-            row1 += '   ';
-            break;
-          case '-':
-            row1 += '---';
-            break;
-          case 'x':
-            row1 += ' x ';
-            break;
-        }
-
-        row1 += '■';
-        row2 += cell.value.padStart(2);
-
-        switch (cell.rightEdge.value) {
-          case '':
-            row2 += '  ';
-            break;
-          case '-':
-            row2 += ' |';
-            break;
-          case 'x':
-            row2 += ' x';
-            break;
-        }
-      });
-
-      output += [row1, row2].join('\n') + '\n';
-    });
-
-    row1 = '■';
-    this.cells[this.rows - 1].forEach((cell, colIndex) => {
-      switch (cell.bottomEdge.value) {
-        case '':
-          row1 += '   ';
-          break;
-        case '-':
-          row1 += '---';
-          break;
-        case 'x':
-          row1 += ' x ';
-          break;
-      }
-
-      row1 += '■';
-    });
-
-    output += row1 + '\n';
-    const diffOutput = this.diff(output, this.prevDebugOutput);
-    this.prevDebugOutput = output;
-    return diffOutput;
-  }
-
   private diff(curr: string, prev: string): string {
     const diffColor = '\u001b[31m';
     const normalColor = '\u001b[0m';
@@ -289,27 +214,99 @@ export class SlitherlinkBoard {
     this.corners = board.corners;
   }
 
-  solve() {
-    return new Promise<void>(resolve => {
-      this.resetBoard();
+  prettyPrint(): string {
+    let output = '';
+    let row1: string;
+    let row2: string;
 
-      if (this.debugLevel > 1) {
-        console.log('Initial state:\n' + this.prettyPrint());
+    this.cells.forEach((cellRow, rowIndex) => {
+      row1 = '■';
+
+      switch (cellRow[0].leftEdge.value) {
+        case '':
+          row2 = ' ';
+          break;
+        case '-':
+          row2 = '|';
+          break;
+        case 'x':
+          row2 = 'x';
+          break;
       }
 
-      this.runOneTimeSolvePass();
+      cellRow.forEach((cell, colIndex) => {
+        switch (cell.topEdge.value) {
+          case '':
+            row1 += '   ';
+            break;
+          case '-':
+            row1 += '---';
+            break;
+          case 'x':
+            row1 += ' x ';
+            break;
+        }
 
-      const result = this.recursiveSolve(0);
+        row1 += '■';
+        row2 += cell.value.padStart(2);
 
-      if (result.solutions === 0) {
-        throw new NoSolutionError();
-      } else {
-        this.apply(result.board);
-      }
+        switch (cell.rightEdge.value) {
+          case '':
+            row2 += '  ';
+            break;
+          case '-':
+            row2 += ' |';
+            break;
+          case 'x':
+            row2 += ' x';
+            break;
+        }
+      });
 
-      this.removeDeletedEdges();
-      resolve();
+      output += [row1, row2].join('\n') + '\n';
     });
+
+    row1 = '■';
+    this.cells[this.rows - 1].forEach((cell, colIndex) => {
+      switch (cell.bottomEdge.value) {
+        case '':
+          row1 += '   ';
+          break;
+        case '-':
+          row1 += '---';
+          break;
+        case 'x':
+          row1 += ' x ';
+          break;
+      }
+
+      row1 += '■';
+    });
+
+    output += row1 + '\n';
+    const diffOutput = this.diff(output, this.prevDebugOutput);
+    this.prevDebugOutput = output;
+    return diffOutput;
+  }
+
+  solve() {
+    this.resetBoard();
+
+    if (this.debugLevel > 1) {
+      console.log('Initial state:\n' + this.prettyPrint());
+    }
+
+    this.runOneTimeSolvePass();
+
+    const result = this.recursiveSolve(0);
+
+    if (result.solutions === 0) {
+      throw new NoSolutionError();
+    } else {
+      this.apply(result.board);
+    }
+
+    this.removeDeletedEdges();
   }
 
   private recursiveSolve(depth: number): IRecursiveSolveResult {
@@ -458,7 +455,7 @@ export class SlitherlinkBoard {
       let edgeCount = 0;
 
       while (true) {
-        edgeMap.set(curEdge, curEdge);
+        edgeMap.set(curEdge, null);
         edgeCount++;
 
         if (curEdge instanceof VEdge) {

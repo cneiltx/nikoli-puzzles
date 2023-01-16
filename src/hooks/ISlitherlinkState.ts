@@ -5,7 +5,6 @@ export interface ISlitherlinkState {
   board: SlitherlinkBoard;
   status: string;
   quote: IQuote;
-  debugLevel: number;
   handleHEdgeClick: (row: number, col: number) => void;
   handleHEdgeContextMenu: (row: number, col: number) => void;
   handleVEdgeClick: (row: number, col: number) => void;

@@ -16,8 +16,8 @@ export const Start = (props: IStartProps) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const columns = +boardSize.substring(0, boardSize.indexOf('x'));
-    const rows = +boardSize.substring(boardSize.indexOf('x') + 1);
+    const rows = +boardSize.substring(0, boardSize.indexOf('x'));
+    const columns = +boardSize.substring(boardSize.indexOf('x') + 1);
     handleStart(game, columns, rows);
   }
 
@@ -36,7 +36,10 @@ export const Start = (props: IStartProps) => {
             <label>Board Size </label>
             <select value={boardSize} onChange={(e) => handleSelectSize(e)}>
               <option value='7x7'>7 x 7</option>
-              <option value='8x8'>8 x 8</option>
+              <option value='10x10'>10 x 10</option>
+              <option value='15x15'>15 x 15</option>
+              <option value='24x12'>24 x 12</option>
+              <option value='20x20'>20 x 20</option>
             </select>
           </div>
         </div>

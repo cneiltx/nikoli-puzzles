@@ -65,6 +65,15 @@ export class Cell {
     return this.bottomRightCorner.bottomRightCell;
   }
 
+  get adjacentCells() {
+    const cells = [];
+    if (this.topCell) cells.push(this.topCell);
+    if (this.bottomCell) cells.push(this.bottomCell);
+    if (this.leftCell) cells.push(this.leftCell);
+    if (this.rightCell) cells.push(this.rightCell);
+    return cells;
+  }
+
   get isCornerCell() {
     return (this.leftCell === null || this.rightCell === null) && (this.topCell === null || this.bottomCell === null);
   }
