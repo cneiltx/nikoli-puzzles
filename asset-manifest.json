@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/nikoli-puzzles/static/css/main.b70a5ea0.css",
-    "main.js": "/nikoli-puzzles/static/js/main.0806a62e.js",
+    "main.css": "/nikoli-puzzles/static/css/main.622e5856.css",
+    "main.js": "/nikoli-puzzles/static/js/main.aacc75b4.js",
     "index.html": "/nikoli-puzzles/index.html",
-    "main.b70a5ea0.css.map": "/nikoli-puzzles/static/css/main.b70a5ea0.css.map",
-    "main.0806a62e.js.map": "/nikoli-puzzles/static/js/main.0806a62e.js.map"
+    "main.622e5856.css.map": "/nikoli-puzzles/static/css/main.622e5856.css.map",
+    "main.aacc75b4.js.map": "/nikoli-puzzles/static/js/main.aacc75b4.js.map"
   },
   "entrypoints": [
-    "static/css/main.b70a5ea0.css",
-    "static/js/main.0806a62e.js"
+    "static/css/main.622e5856.css",
+    "static/js/main.aacc75b4.js"
   ]
 }
