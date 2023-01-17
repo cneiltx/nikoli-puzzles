@@ -7,6 +7,7 @@ import { NoSolutionError } from './NoSolutionError';
 import { IRecursiveSolveResult } from './IRecursiveSolveResult';
 import { ISolvedCheckResult } from './ISolvedCheckResult';
 import { IMarkEdgeResult } from './IMarkEdgeResult';
+import { MaxSolveDepthExceededError } from './MaxSolveDepthExceededError';
 
 export class SlitherlinkBoard {
   rows: number;
@@ -289,7 +290,7 @@ export class SlitherlinkBoard {
     return diffOutput;
   }
 
-  solve() {
+  solve(maxDepth = 0) {
     this.resetBoard();
 
     if (this.debugLevel > 1) {
@@ -298,7 +299,7 @@ export class SlitherlinkBoard {
 
     this.runOneTimeSolvePass();
 
-    const result = this.recursiveSolve(0);
+    const result = this.recursiveSolve(0, maxDepth);
 
     if (result.solutions === 0) {
       throw new NoSolutionError();
@@ -309,9 +310,13 @@ export class SlitherlinkBoard {
     this.removeDeletedEdges();
   }
 
-  private recursiveSolve(depth: number): IRecursiveSolveResult {
+  private recursiveSolve(depth: number, maxDepth: number): IRecursiveSolveResult {
     if (this.debugLevel > 0) {
       console.log(`Recursive solve depth ${depth}`);
+    }
+
+    if (maxDepth > 0 && depth > maxDepth) {
+      throw new MaxSolveDepthExceededError();
     }
 
     if (!this.runSolveLoop()) {
@@ -384,7 +389,7 @@ export class SlitherlinkBoard {
         console.log(`Recursing with included ${cloneEdge instanceof HEdge ? 'horizontal' : 'vertical'} edge {${cloneEdge.row}, ${cloneEdge.col}}`);
       }
 
-      const setResult = clone.recursiveSolve(depth + 1);
+      const setResult = clone.recursiveSolve(depth + 1, maxDepth);
 
       if (setResult.solutions > 1) {
         throw new MultipleSolutionsError();
@@ -400,7 +405,7 @@ export class SlitherlinkBoard {
         console.log(`Recursing with excluded edge {${cloneEdge.row}, ${cloneEdge.col}}`);
       }
 
-      const unsetResult = clone.recursiveSolve(depth + 1);
+      const unsetResult = clone.recursiveSolve(depth + 1, maxDepth);
 
       if (setResult.solutions + unsetResult.solutions > 1) {
         throw new MultipleSolutionsError();

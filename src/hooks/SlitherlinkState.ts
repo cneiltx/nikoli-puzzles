@@ -18,6 +18,7 @@ export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkSta
 
   const [quote, setQuote] = useState<IQuote>({ quote: '', author: '' });
 
+  // TODO: Implement generating status and wait dialog
   useEffect(() => {
     setBoard(new SlitherlinkGenerator().generateBoard(rows, columns));
     let ignore = false;

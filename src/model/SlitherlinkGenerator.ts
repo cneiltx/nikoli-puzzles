@@ -1,4 +1,5 @@
 import { Cell } from "./Cell";
+import { MaxSolveDepthExceededError } from "./MaxSolveDepthExceededError";
 import { MultipleSolutionsError } from "./MultipleSolutionsError";
 import { SlitherlinkBoard } from "./SlitherlinkBoard";
 
@@ -8,30 +9,6 @@ export class SlitherlinkGenerator {
     this.generatePath(board);
     this.removeNumbers(board);
     return board;
-  }
-
-  private removeNumbers(board: SlitherlinkBoard) {
-    const availableCells = board.cells.flat();
-
-    while (availableCells.length > 0) {
-      const curIndex = this.getRandomIndex(availableCells);
-      const cell = availableCells[curIndex];
-      availableCells.splice(curIndex, 1);
-      const value = cell.value;
-      cell.value = '';
-
-      try {
-        board.solve();
-      } catch (e) {
-        if (e instanceof MultipleSolutionsError) {
-          cell.value = value;
-        } else {
-          console.error(e);
-        }
-      }
-    }
-
-    board.resetBoard();
   }
 
   private generatePath(board: SlitherlinkBoard) {
@@ -137,5 +114,31 @@ export class SlitherlinkGenerator {
     } else {
       return false;
     }
+  }
+
+  private removeNumbers(board: SlitherlinkBoard) {
+    const eligibleCells = board.cells.flat();
+
+    while (eligibleCells.length > 0) {
+      const curIndex = this.getRandomIndex(eligibleCells);
+      const cell = eligibleCells[curIndex];
+      eligibleCells.splice(curIndex, 1);
+      const cellValue = cell.value;
+      board.cells[cell.row][cell.col].value = '';
+
+      console.log(`${eligibleCells.length} cells remaining`);
+
+      try {
+        board.solve(30); // TODO: Tie recursion depth to difficulty
+      } catch (e) {
+        if (e instanceof MultipleSolutionsError || e instanceof MaxSolveDepthExceededError) {
+          board.cells[cell.row][cell.col].value = cellValue;
+        } else {
+          console.error(e);
+        }
+      }
+    }
+
+    board.resetBoard();
   }
 }
