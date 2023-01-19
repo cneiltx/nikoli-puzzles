@@ -5,8 +5,6 @@ import { SlitherlinkGenerator } from '../model/SlitherlinkGenerator';
 import { SlitherlinkBoard } from '../model/SlitherlinkBoard';
 
 export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
-  const [board, setBoard] = useState(new SlitherlinkBoard([[]]));
-
   // status values
   //   playing - user is working on the puzzle
   //   resetRequest - user requested to reset the board
@@ -14,28 +12,37 @@ export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkSta
   //   autoSolving - board is being auto solved
   //   userSolved - user just solved the puzzle (and needs to be informed)
   //   solved - board has been solved (either by user or auto solved)
-  const [status, setStatus] = useState('playing');
+  const [status, setStatus] = useState('generating');
 
+  const [board, setBoard] = useState(new SlitherlinkBoard([[]]));
   const [quote, setQuote] = useState<IQuote>({ quote: '', author: '' });
+  const [progress, setProgress] = useState(0);
 
   // TODO: Implement generating status and wait dialog
   useEffect(() => {
-    setBoard(new SlitherlinkGenerator().generateBoard(rows, columns));
-    let ignore = false;
-    fetch('https://api.quotable.io/random')
-      .then(response => response.json())
-      .then(json => {
-        if (!ignore) {
-          setQuote({
-            quote: json.content,
-            author: json.author
-          });
-        }
-      })
-      .catch(e => console.error(e));
-    return () => {
-      ignore = true;
-    }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          setBoard(new SlitherlinkGenerator().generateBoard(rows, columns));
+          setStatus('playing');
+          let ignore = false;
+          fetch('https://api.quotable.io/random')
+            .then(response => response.json())
+            .then(json => {
+              if (!ignore) {
+                setQuote({
+                  quote: json.content,
+                  author: json.author
+                });
+              }
+            })
+            .catch(e => console.error(e));
+          return () => {
+            ignore = true;
+          }
+        }, 1);
+      });
+    });
   }, []);
 
   useEffect(() => {
@@ -46,7 +53,7 @@ export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkSta
             board.solve();
             setStatus('solved');
             setBoard(Object.create(board));
-          }, 0);
+          }, 1);
         });
       });
     }

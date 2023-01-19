@@ -126,10 +126,8 @@ export class SlitherlinkGenerator {
       const cellValue = cell.value;
       board.cells[cell.row][cell.col].value = '';
 
-      console.log(`${eligibleCells.length} cells remaining`);
-
       try {
-        board.solve(30); // TODO: Tie recursion depth to difficulty
+        board.solve(1); // TODO: Tie recursion depth to difficulty
       } catch (e) {
         if (e instanceof MultipleSolutionsError || e instanceof MaxSolveDepthExceededError) {
           board.cells[cell.row][cell.col].value = cellValue;

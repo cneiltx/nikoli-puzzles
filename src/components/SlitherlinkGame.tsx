@@ -96,6 +96,8 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
         <button onClick={game.handleResetRequest} disabled={!['playing', 'solved'].includes(game.status)}>Reset</button>
         <button onClick={game.handleSolveRequest} disabled={game.status !== 'playing'}>Solve</button>
       </div>
+      {game.status === 'generating' &&
+        <Dialog message={`Generating game board...`} imagePath={process.env.PUBLIC_URL + '/rubiks-cube-loader.gif'} />}
       {game.status === 'resetRequest' &&
         <Dialog message='Are you sure you want to reset the game?' buttons={['OK', 'Cancel']} handleButtonClick={game.handleResetConfirm} />}
       {game.status === 'solveRequest' &&

@@ -290,7 +290,7 @@ export class SlitherlinkBoard {
     return diffOutput;
   }
 
-  solve(maxDepth = 0) {
+  solve(maxDepth = 1000) {
     this.resetBoard();
 
     if (this.debugLevel > 1) {
@@ -299,7 +299,7 @@ export class SlitherlinkBoard {
 
     this.runOneTimeSolvePass();
 
-    const result = this.recursiveSolve(0, maxDepth);
+    const result = this.recursiveSolve(1, maxDepth);
 
     if (result.solutions === 0) {
       throw new NoSolutionError();
@@ -315,7 +315,7 @@ export class SlitherlinkBoard {
       console.log(`Recursive solve depth ${depth}`);
     }
 
-    if (maxDepth > 0 && depth > maxDepth) {
+    if (depth > maxDepth) {
       throw new MaxSolveDepthExceededError();
     }
 
