@@ -5,6 +5,8 @@ import { HEdge } from './HEdge';
 import { VEdge } from './VEdge';
 import { SlitherlinkState } from '../hooks/SlitherlinkState';
 import { ISlitherlinkGameProps } from './ISlitherlinkGameProps';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons';
 
 export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
   const { rows, columns, handleNewGame } = props;
@@ -83,6 +85,15 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
     boardStyle.pointerEvents = 'none';
   }
 
+  const getElapsedTime = () => {
+    const elapsed = Date.now() - game.startTime;
+    const hours = Math.floor(elapsed / 1000 / 60 / 60);
+    const minutes = Math.floor((elapsed / 1000 / 60) % 60);
+    const seconds = Math.floor((elapsed / 1000) % 60);
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  // TODO: Figure out why undo button was enabled after user solved
   return (
     <div className='game'>
       <div
@@ -94,6 +105,12 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
       <div className='buttonRow'>
         <button onClick={handleNewGame} disabled={!['playing', 'solved'].includes(game.status)}>New Game</button>
         <button onClick={game.handleResetRequest} disabled={!['playing', 'solved'].includes(game.status)}>Reset</button>
+        <button onClick={game.handleUndo} disabled={!['playing', 'solved'].includes(game.status) || !game.canUndo}>
+          <FontAwesomeIcon icon={faUndo} />
+        </button>
+        <button onClick={game.handleRedo} disabled={!['playing', 'solved'].includes(game.status) || !game.canRedo}>
+          <FontAwesomeIcon icon={faRedo} />
+        </button>
         <button onClick={game.handleSolveRequest} disabled={game.status !== 'playing'}>Solve</button>
       </div>
       {game.status === 'generating' &&
@@ -103,7 +120,11 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
       {game.status === 'solveRequest' &&
         <Dialog message='Are you sure you want to see the solution?' buttons={['OK', 'Cancel']} handleButtonClick={game.handleSolveConfirm} />}
       {game.status === 'userSolved' &&
-        <Dialog message='Congratulations, you solved it!' quote={game.quote} buttons={['OK']} handleButtonClick={game.handleUserSolvedConfirm} />}
+        <Dialog
+          message={`Congratulations, you solved it!\nElapsed time: ${getElapsedTime()}`}
+          quote={game.quote} buttons={['OK']}
+          handleButtonClick={game.handleUserSolvedConfirm}
+        />}
       {game.status === 'autoSolving' &&
         <Dialog message='Solving...' imagePath={process.env.PUBLIC_URL + '/rubiks-cube-loader.gif'} />}
     </div>
