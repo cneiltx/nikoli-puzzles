@@ -1,6 +1,7 @@
 import { Corner } from './Corner';
 import { Cell } from './Cell';
 import { VEdge } from './VEdge';
+import { IValueChanged } from './IValueChanged';
 
 export class HEdge {
   row: number;
@@ -10,16 +11,14 @@ export class HEdge {
   leftCell: Cell | null = null;
   rightCell: Cell | null = null;
 
-  // TODO: Figure out if we can use this or not
   private privateValue: string;
-  private onValueChanged(value: string): void { };
+  onValueChanged: IValueChanged = () => { };
 
-  constructor(row: number, col: number, value: string, onValueChanged = (value: string) => { }) {
+  constructor(row: number, col: number, value: string) {
     const tempCorner = new Corner(-1, -1, 'temp');
     this.row = row;
     this.col = col;
     this.privateValue = value;
-    this.onValueChanged = onValueChanged;
     this.topCorner = tempCorner;
     this.bottomCorner = tempCorner;
   }

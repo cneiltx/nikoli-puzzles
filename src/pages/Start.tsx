@@ -35,6 +35,7 @@ export const Start = (props: IStartProps) => {
           <div>
             <label>Board Size </label>
             <select value={boardSize} onChange={(e) => handleSelectSize(e)}>
+              <option value='5x5'>5 x 5</option>
               <option value='7x7'>7 x 7</option>
               <option value='10x10'>10 x 10</option>
               <option value='15x15'>15 x 15</option>

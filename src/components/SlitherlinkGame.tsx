@@ -21,6 +21,7 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
           key={`vedge-${row}-${col}`}
           row={row} col={col}
           value={game.board.vEdges[row][col].value}
+          edge={game.board.vEdges[row][col]}
           handleClick={game.handleVEdgeClick}
           handleContextMenu={game.handleVEdgeContextMenu} />
       );
@@ -33,6 +34,7 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
           key={`hedge-${row}-${col}`}
           row={row} col={col}
           value={game.board.hEdges[row][col].value}
+          edge={game.board.hEdges[row][col]}
           handleClick={game.handleHEdgeClick}
           handleContextMenu={game.handleHEdgeContextMenu} />
       );
@@ -58,6 +60,7 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
         key={`hedge-${row}-${game.board.columns}`}
         row={row} col={game.board.columns}
         value={game.board.hEdges[row][game.board.columns].value}
+        edge={game.board.hEdges[row][game.board.columns]}
         handleClick={game.handleHEdgeClick}
         handleContextMenu={game.handleHEdgeContextMenu} />
     );
@@ -69,6 +72,7 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
         key={`vedge-${game.board.rows}-${col}`}
         row={game.board.rows} col={col}
         value={game.board.vEdges[game.board.rows][col].value}
+        edge={game.board.vEdges[game.board.rows][col]}
         handleClick={game.handleVEdgeClick}
         handleContextMenu={game.handleVEdgeContextMenu} />
     );

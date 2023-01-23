@@ -1,7 +1,13 @@
+import { useState } from "react";
 import { IVEdgeProps } from "./IVEdgeProps";
 
 export const VEdge = (props: IVEdgeProps) => {
-  const { row, col, value = '', handleClick = (row, col) => { }, handleContextMenu = (row, col) => { } } = props;
+  const { row, col, edge, handleClick = (row, col) => { }, handleContextMenu = (row, col) => { } } = props;
+  const [value, setValue] = useState(props.value);
+
+  edge.onValueChanged = (value) => {
+    setValue(value);
+  }
 
   const style: Record<string, any> = {};
   if (value === '-') {

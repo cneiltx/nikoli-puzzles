@@ -127,7 +127,7 @@ export class SlitherlinkGenerator {
       board.cells[cell.row][cell.col].value = '';
 
       try {
-        board.solve(1); // TODO: Tie recursion depth and solve loop iterations to difficulty
+        board.solve(1, 3);
       } catch (e) {
         if (e instanceof MultipleSolutionsError || e instanceof MaxSolveDepthExceededError) {
           board.cells[cell.row][cell.col].value = cellValue;

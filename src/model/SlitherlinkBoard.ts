@@ -290,7 +290,7 @@ export class SlitherlinkBoard {
     return diffOutput;
   }
 
-  solve(maxDepth = 1000) {
+  solve(maxDepth = 0, maxIterations = 0) {
     this.resetBoard();
 
     if (this.debugLevel > 1) {
@@ -299,7 +299,7 @@ export class SlitherlinkBoard {
 
     this.runOneTimeSolvePass();
 
-    const result = this.recursiveSolve(1, maxDepth);
+    const result = this.recursiveSolve(1, maxDepth, maxIterations);
 
     if (result.solutions === 0) {
       throw new NoSolutionError();
@@ -310,16 +310,16 @@ export class SlitherlinkBoard {
     this.removeDeletedEdges();
   }
 
-  private recursiveSolve(depth: number, maxDepth: number): IRecursiveSolveResult {
+  private recursiveSolve(depth = 1, maxDepth = 0, maxIterations = 0): IRecursiveSolveResult {
     if (this.debugLevel > 0) {
       console.log(`Recursive solve depth ${depth}`);
     }
 
-    if (depth > maxDepth) {
+    if (maxDepth > 0 && depth > maxDepth) {
       throw new MaxSolveDepthExceededError();
     }
 
-    if (!this.runSolveLoop()) {
+    if (!this.runSolveLoop(maxIterations)) {
       if (this.debugLevel > 0) {
         console.log(`No solution found: conflict detected`);
       }
@@ -594,7 +594,7 @@ export class SlitherlinkBoard {
   }
 
   // returns false if any conflicts occur
-  runSolveLoop(): boolean {
+  runSolveLoop(maxIterations = 0): boolean {
     let modified = true;
     let iteration = 0;
 
@@ -602,6 +602,13 @@ export class SlitherlinkBoard {
       modified = false;
       iteration++;
       let conflict = false;
+
+      if (maxIterations > 0 && iteration > maxIterations) {
+        if (this.debugLevel > 0) {
+          console.log('Exiting solve loop due to max iterations');
+        }
+        break;
+      }
 
       for (const cellRow of this.cells) {
         for (const cell of cellRow) {

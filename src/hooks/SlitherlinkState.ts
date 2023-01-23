@@ -55,7 +55,6 @@ export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkSta
       setTimeout(() => {
         board.solve();
         setStatus('solved');
-        setBoard(Object.create(board));
       }, 100);
     }
   }, [status, board]);
@@ -80,7 +79,6 @@ export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkSta
 
   const doMove = (item: HEdge | VEdge, prevValue: string, newValue: string) => {
     item.value = newValue;
-    setBoard(Object.create(board));
     const enableUndo = undoStack.length === 0;
     undoStack.push(new Move(item, prevValue, newValue));
     setRedoStack([]);
@@ -115,7 +113,6 @@ export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkSta
   const handleResetConfirm = (button: string) => {
     if (button === 'OK') {
       board.resetBoard();
-      setBoard(Object.create(board));
       setUndoStack([]);
       setRedoStack([]);
       setStatus('playing');
@@ -128,7 +125,6 @@ export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkSta
     if (undoStack.length > 0) {
       const move = undoStack.pop()!;
       move.item.value = move.prevValue;
-      setBoard(Object.create(board));
       const enableRedo = redoStack.length === 0;
       redoStack.push(move);
 
@@ -145,7 +141,6 @@ export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkSta
     if (redoStack.length > 0) {
       const move = redoStack.pop()!;
       move.item.value = move.newValue;
-      setBoard(Object.create(board));
       const enableUndo = undoStack.length === 0;
       undoStack.push(move);
 
