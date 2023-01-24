@@ -5,6 +5,7 @@ export const AppState = (): IAppState => {
   const [game, setGame] = useState('');
   const [columns, setColumns] = useState(0);
   const [rows, setRows] = useState(0);
+  const [difficulty, setDifficulty] = useState('');
   const [status, setStatus] = useState('new');
   const [dialog, setDialog] = useState('');
 
@@ -12,10 +13,11 @@ export const AppState = (): IAppState => {
     new Image().src = process.env.PUBLIC_URL + '/rubiks-cube-loader.gif';
   }, []);
 
-  const handleStart = (game: string, rows: number, columns: number) => {
+  const handleStart = (game: string, rows: number, columns: number, difficulty: string) => {
     setGame(game);
     setRows(rows);
     setColumns(columns);
+    setDifficulty(difficulty);
     setStatus('started');
   };
 
@@ -30,5 +32,5 @@ export const AppState = (): IAppState => {
     setDialog('');
   }
 
-  return { game, rows, columns, status, dialog, handleStart, handleNewGame, handleNewGameConfirm };
+  return { game, rows, columns, difficulty, status, dialog, handleStart, handleNewGame, handleNewGameConfirm };
 };

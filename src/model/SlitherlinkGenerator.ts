@@ -4,10 +4,10 @@ import { MultipleSolutionsError } from "./MultipleSolutionsError";
 import { SlitherlinkBoard } from "./SlitherlinkBoard";
 
 export class SlitherlinkGenerator {
-  generateBoard(rows: number, columns: number): SlitherlinkBoard {
+  generateBoard(rows: number, columns: number, difficulty: string): SlitherlinkBoard {
     const board = new SlitherlinkBoard(new Array(rows).fill('').map(() => new Array(columns).fill('')));
     this.generatePath(board);
-    this.removeNumbers(board);
+    this.removeNumbers(board, difficulty);
     return board;
   }
 
@@ -116,7 +116,7 @@ export class SlitherlinkGenerator {
     }
   }
 
-  private removeNumbers(board: SlitherlinkBoard) {
+  private removeNumbers(board: SlitherlinkBoard, difficulty: string) {
     const eligibleCells = board.cells.flat();
 
     while (eligibleCells.length > 0) {
@@ -126,8 +126,15 @@ export class SlitherlinkGenerator {
       const cellValue = cell.value;
       board.cells[cell.row][cell.col].value = '';
 
+      let maxSolveIterations = 2;
+      if (difficulty === 'medium') {
+        maxSolveIterations = 4;
+      } else if (difficulty === 'hard') {
+        maxSolveIterations = 6;
+      }
+
       try {
-        board.solve(1, 3);
+        board.solve(1, maxSolveIterations);
       } catch (e) {
         if (e instanceof MultipleSolutionsError || e instanceof MaxSolveDepthExceededError) {
           board.cells[cell.row][cell.col].value = cellValue;

@@ -1,53 +1,42 @@
-import { useState, FormEvent } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { IStartProps } from './IStartProps';
 
 export const Start = (props: IStartProps) => {
   const { handleStart } = props;
   const [game, setGame] = useState('Slitherlink');
-  const [boardSize, setBoardSize] = useState('7x7');
+  const [boardSize, setBoardSize] = useState('5x5');
+  const [difficulty, setDifficulty] = useState('easy');
 
-  const handleSelectGame = (e: FormEvent<HTMLSelectElement>) => {
-    setGame(e.currentTarget.value);
+  const handleSelectSize = (e: React.MouseEvent) => {
+    setBoardSize(e.currentTarget.id);
   }
 
-  const handleSelectSize = (e: FormEvent<HTMLSelectElement>) => {
-    setBoardSize(e.currentTarget.value);
-  }
+  const handleSelectDifficulty = (e: React.MouseEvent) => {
+    setDifficulty(e.currentTarget.id);
+  };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = (e: React.MouseEvent) => {
     const rows = +boardSize.substring(0, boardSize.indexOf('x'));
     const columns = +boardSize.substring(boardSize.indexOf('x') + 1);
-    handleStart(game, columns, rows);
+    handleStart(game, columns, rows, difficulty);
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className='startPage'>
-        <div className='title'>Game Selection</div>
-        <div className='buttonRow'>
-          <div>
-            <label>Game </label>
-            <select value={game} onChange={(e) => handleSelectGame(e)}>
-              <option value='Slitherlink'>Slitherlink</option>
-            </select>
-          </div>
-          <div>
-            <label>Board Size </label>
-            <select value={boardSize} onChange={(e) => handleSelectSize(e)}>
-              <option value='5x5'>5 x 5</option>
-              <option value='7x7'>7 x 7</option>
-              <option value='10x10'>10 x 10</option>
-              <option value='15x15'>15 x 15</option>
-              <option value='24x12'>24 x 12</option>
-              <option value='20x20'>20 x 20</option>
-            </select>
-          </div>
-        </div>
-        <div className='buttonRow'>
-          <button type='submit' autoFocus>Start</button>
-        </div>
+    <div className='startPage'>
+      <div className='verticalSelector'>
+        <div id='5x5' onClick={(e) => handleSelectSize(e)} className={'selector' + (boardSize === '5x5' ? ' selected' : '')}>5 x 5</div>
+        <div id='7x7' onClick={(e) => handleSelectSize(e)} className={'selector' + (boardSize === '7x7' ? ' selected' : '')}>7 x 7</div>
+        <div id='10x10' onClick={(e) => handleSelectSize(e)} className={'selector' + (boardSize === '10x10' ? ' selected' : '')}>10 x 10</div>
+        <div id='15x15' onClick={(e) => handleSelectSize(e)} className={'selector' + (boardSize === '15x15' ? ' selected' : '')}>15 x 15</div>
+        <div id='24x12' onClick={(e) => handleSelectSize(e)} className={'selector' + (boardSize === '24x12' ? ' selected' : '')}>24 x 12</div>
+        <div id='20x20' onClick={(e) => handleSelectSize(e)} className={'selector' + (boardSize === '20x20' ? ' selected' : '')}>20 x 20</div>
       </div>
-    </form>
+      <div className='verticalSelector'>
+        <div id='easy' onClick={(e) => handleSelectDifficulty(e)} className={'selector' + (difficulty === 'easy' ? ' selected' : '')}>Easy</div>
+        <div id='medium' onClick={(e) => handleSelectDifficulty(e)} className={'selector' + (difficulty === 'medium' ? ' selected' : '')}>Medium</div>
+        <div id='hard' onClick={(e) => handleSelectDifficulty(e)} className={'selector' + (difficulty === 'hard' ? ' selected' : '')}>Hard</div>
+      </div>
+      <button className='bigButton' onClick={(e) => handleSubmit(e)} autoFocus>Go!</button>
+    </div>
   );
 };

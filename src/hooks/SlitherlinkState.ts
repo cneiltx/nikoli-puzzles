@@ -7,7 +7,7 @@ import { Move } from '../model/Move';
 import { HEdge } from '../model/HEdge';
 import { VEdge } from '../model/VEdge';
 
-export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkState => {
+export const SlitherlinkState = (rows: number, columns: number, difficulty: string): ISlitherlinkState => {
   // status values
   //   playing - user is working on the puzzle
   //   resetRequest - user requested to reset the board
@@ -45,7 +45,7 @@ export const SlitherlinkState = (rows: number, columns: number): ISlitherlinkSta
 
   useEffect(() => {
     setTimeout(() => {
-      setBoard(new SlitherlinkGenerator().generateBoard(rows, columns));
+      setBoard(new SlitherlinkGenerator().generateBoard(rows, columns, difficulty));
       setStatus('playing');
     }, 100);
   }, []);

@@ -9,8 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons';
 
 export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
-  const { rows, columns, handleNewGame } = props;
-  const game = SlitherlinkState(rows, columns);
+  const { rows, columns, difficulty, handleNewGame } = props;
+  const game = SlitherlinkState(rows, columns, difficulty);
   const content = [];
 
   for (let row = 0; row < game.board.rows; row++) {
