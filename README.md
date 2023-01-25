@@ -1,4 +1,4 @@
-TODO: Describe the project
+Generates [Nikoli](https://en.wikipedia.org/wiki/Nikoli_(publisher)) puzzles to solve.
 
 ## Available Scripts
 

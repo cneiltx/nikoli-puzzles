@@ -6,11 +6,13 @@ import { VEdge } from './VEdge';
 import { SlitherlinkState } from '../hooks/SlitherlinkState';
 import { ISlitherlinkGameProps } from './ISlitherlinkGameProps';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUndo, faRedo } from '@fortawesome/free-solid-svg-icons';
+import { faUndo, faRedo, faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
 
 export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
   const { rows, columns, difficulty, handleNewGame } = props;
   const game = SlitherlinkState(rows, columns, difficulty);
+  const [showHelp, setShowHelp] = useState(false);
   const content = [];
 
   for (let row = 0; row < game.board.rows; row++) {
@@ -97,7 +99,24 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
     return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 
-  // TODO: Figure out why undo button was enabled after user solved
+  const handleHelp = () => {
+    setShowHelp(true);
+  }
+
+  const handleHelpDismissed = () => {
+    setShowHelp(false);
+  }
+
+  const helpText = `Click between the dots to form a single loop 
+  that does not cross itself or branch.
+
+    Cells with numbers indicate how many lines 
+    must surround the cell.
+    
+    Empty cells can be surrounded by any number of lines.
+
+    Right-click to mark excluded edges.`;
+
   return (
     <div className='game'>
       <div
@@ -107,6 +126,9 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
         {content}
       </div>
       <div className='buttonRow'>
+        <button onClick={handleHelp}>
+          <FontAwesomeIcon icon={faCircleInfo} />
+        </button>
         <button onClick={handleNewGame} disabled={!['playing', 'solved'].includes(game.status)}>New Game</button>
         <button onClick={game.handleResetRequest} disabled={!['playing', 'solved'].includes(game.status)}>Reset</button>
         <button onClick={game.handleUndo} disabled={!['playing', 'solved'].includes(game.status) || !game.canUndo}>
@@ -117,6 +139,8 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
         </button>
         <button onClick={game.handleSolveRequest} disabled={game.status !== 'playing'}>Solve</button>
       </div>
+      {showHelp &&
+        <Dialog message={helpText} buttons={['OK']} handleButtonClick={handleHelpDismissed} />}
       {game.status === 'generating' &&
         <Dialog message={`Generating game board...`} imagePath={process.env.PUBLIC_URL + '/rubiks-cube-loader.gif'} />}
       {game.status === 'resetRequest' &&

@@ -5,6 +5,22 @@
   color: #cabba7;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 2.5vh;
+  scrollbar-color: #0f3712 #4f5252;
+}
+
+::-webkit-scrollbar {
+  width: 15px;
+}
+
+::-webkit-scrollbar-track {
+  background: #4f5252;
+  border-radius: 15px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0f3712;
+  border: 3px solid #4f5252;
+  border-radius: 15px;
 }
 
 .app {
@@ -150,6 +166,7 @@ button:disabled {
   left: 50%;
   min-width: 30%;
   max-width: 80%;
+  max-height: 80%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: row;
@@ -158,6 +175,7 @@ button:disabled {
   gap: 5vh;
   font-weight: bold;
   border: 1vh solid #0f3712;
+  overflow-y: auto;
 }
 
 .dialogImage {

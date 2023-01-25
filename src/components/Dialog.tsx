@@ -6,7 +6,7 @@ export const Dialog = (props: IDialogProps) => {
   const content: JSX.Element[] = [];
   if (buttons && handleButtonClick) {
     buttons.forEach((button, index) => {
-      content.push(<button key={button} onClick={() => handleButtonClick(button)} autoFocus={index === 0}>{button}</button>);
+      content.push(<button key={button} onClick={() => handleButtonClick(button)} >{button}</button>);
     });
   }
 
