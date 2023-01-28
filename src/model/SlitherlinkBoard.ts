@@ -8,6 +8,8 @@ import { IRecursiveSolveResult } from './IRecursiveSolveResult';
 import { ISolvedCheckResult } from './ISolvedCheckResult';
 import { IMarkEdgeResult } from './IMarkEdgeResult';
 import { MaxSolveDepthExceededError } from './MaxSolveDepthExceededError';
+import { ISolveResult } from './ISolveResult';
+import { ISolveLoopResult } from './ISolveLoopResult';
 
 export class SlitherlinkBoard {
   rows: number;
@@ -206,13 +208,17 @@ export class SlitherlinkBoard {
   }
 
   private apply(board: SlitherlinkBoard) {
-    this.rows = board.rows;
-    this.columns = board.columns;
-    this.debugLevel = board.debugLevel;
-    this.cells = board.cells;
-    this.vEdges = board.vEdges;
-    this.hEdges = board.hEdges;
-    this.corners = board.corners;
+    this.vEdges.forEach((edgeRow) => {
+      edgeRow.forEach((edge) => {
+        edge.value = board.vEdges[edge.row][edge.col].value;
+      })
+    });
+
+    this.hEdges.forEach((edgeRow) => {
+      edgeRow.forEach((edge) => {
+        edge.value = board.hEdges[edge.row][edge.col].value;
+      })
+    });
   }
 
   prettyPrint(): string {
@@ -220,7 +226,7 @@ export class SlitherlinkBoard {
     let row1: string;
     let row2: string;
 
-    this.cells.forEach((cellRow, rowIndex) => {
+    this.cells.forEach((cellRow) => {
       row1 = '■';
 
       switch (cellRow[0].leftEdge.value) {
@@ -235,7 +241,7 @@ export class SlitherlinkBoard {
           break;
       }
 
-      cellRow.forEach((cell, colIndex) => {
+      cellRow.forEach((cell) => {
         switch (cell.topEdge.value) {
           case '':
             row1 += '   ';
@@ -268,7 +274,7 @@ export class SlitherlinkBoard {
     });
 
     row1 = '■';
-    this.cells[this.rows - 1].forEach((cell, colIndex) => {
+    this.cells[this.rows - 1].forEach((cell) => {
       switch (cell.bottomEdge.value) {
         case '':
           row1 += '   ';
@@ -290,16 +296,17 @@ export class SlitherlinkBoard {
     return diffOutput;
   }
 
-  solve(maxDepth = 0, maxIterations = 0) {
+  solve(maxDepth = 0, maxIterations = 0): ISolveResult {
     this.resetBoard();
 
     if (this.debugLevel > 1) {
       console.log('Initial state:\n' + this.prettyPrint());
     }
 
-    this.runOneTimeSolvePass();
+    const clone = this.deepClone();
+    clone.runOneTimeSolvePass();
 
-    const result = this.recursiveSolve(1, maxDepth, maxIterations);
+    const result = clone.recursiveSolve(1, 1, maxDepth, maxIterations);
 
     if (result.solutions === 0) {
       throw new NoSolutionError();
@@ -308,9 +315,11 @@ export class SlitherlinkBoard {
     }
 
     this.removeDeletedEdges();
+
+    return { maxDepth: result.maxDepth, maxIterations: result.maxIterations };
   }
 
-  private recursiveSolve(depth = 1, maxDepth = 0, maxIterations = 0): IRecursiveSolveResult {
+  private recursiveSolve(depth = 1, iterations = 1, maxDepth = 0, maxIterations = 0): IRecursiveSolveResult {
     if (this.debugLevel > 0) {
       console.log(`Recursive solve depth ${depth}`);
     }
@@ -319,11 +328,14 @@ export class SlitherlinkBoard {
       throw new MaxSolveDepthExceededError();
     }
 
-    if (!this.runSolveLoop(maxIterations)) {
+    const solveLoopResult = this.runSolveLoop(maxIterations);
+    const latestIterations = Math.max(iterations, solveLoopResult.iterations);
+
+    if (solveLoopResult.conflict) {
       if (this.debugLevel > 0) {
         console.log(`No solution found: conflict detected`);
       }
-      return { board: this, solutions: 0 };
+      return { board: this, solutions: 0, maxDepth: depth, maxIterations: latestIterations };
     }
 
     const solvedResult = this.runSolvedCheck();
@@ -332,14 +344,14 @@ export class SlitherlinkBoard {
       if (this.debugLevel > 0) {
         console.log('No solution found: board is invalid');
       }
-      return { board: this, solutions: 0 };
+      return { board: this, solutions: 0, maxDepth: depth, maxIterations: latestIterations };
     }
 
     if (solvedResult.isSolved) {
       if (this.debugLevel > 0) {
         console.log('Solution found');
       }
-      return { board: this, solutions: 1 };
+      return { board: this, solutions: 1, maxDepth: depth, maxIterations: latestIterations };
     }
 
     let selectedEdge: VEdge | HEdge | undefined;
@@ -377,7 +389,7 @@ export class SlitherlinkBoard {
         console.log('No solution found: no unset edges');
       }
 
-      return { board: this, solutions: 0 };
+      return { board: this, solutions: 0, maxDepth: depth, maxIterations: latestIterations };
     } else {
       // first, try setting the selected edge
       let clone = this.deepClone();
@@ -389,7 +401,7 @@ export class SlitherlinkBoard {
         console.log(`Recursing with included ${cloneEdge instanceof HEdge ? 'horizontal' : 'vertical'} edge {${cloneEdge.row}, ${cloneEdge.col}}`);
       }
 
-      const setResult = clone.recursiveSolve(depth + 1, maxDepth);
+      const setResult = clone.recursiveSolve(depth + 1, latestIterations, maxDepth, maxIterations);
 
       if (setResult.solutions > 1) {
         throw new MultipleSolutionsError();
@@ -405,7 +417,7 @@ export class SlitherlinkBoard {
         console.log(`Recursing with excluded edge {${cloneEdge.row}, ${cloneEdge.col}}`);
       }
 
-      const unsetResult = clone.recursiveSolve(depth + 1, maxDepth);
+      const unsetResult = clone.recursiveSolve(depth + 1, latestIterations, maxDepth, maxIterations);
 
       if (setResult.solutions + unsetResult.solutions > 1) {
         throw new MultipleSolutionsError();
@@ -593,8 +605,7 @@ export class SlitherlinkBoard {
     }
   }
 
-  // returns false if any conflicts occur
-  runSolveLoop(maxIterations = 0): boolean {
+  runSolveLoop(maxIterations = 0): ISolveLoopResult {
     let modified = true;
     let iteration = 0;
 
@@ -618,7 +629,7 @@ export class SlitherlinkBoard {
               if (this.debugLevel > 0) {
                 console.log(`Cell value conflict for cell {${cell.row}, ${cell.col}}`);
               }
-              return false;
+              return { conflict: true, iterations: iteration };
             }
           } else if (cell.value === '1') {
             if (cell.includedEdges.length === 1) {
@@ -763,7 +774,7 @@ export class SlitherlinkBoard {
               if (this.debugLevel > 0) {
                 console.log(`Cell value conflict for cell {${cell.row}, ${cell.col}}`);
               }
-              return false;
+              return { conflict: true, iterations: iteration };
             }
           } else if (cell.value === '2') {
             if (cell.includedEdges.length === 2) {
@@ -1199,7 +1210,7 @@ export class SlitherlinkBoard {
               if (this.debugLevel > 0) {
                 console.log(`Cell value conflict for cell {${cell.row}, ${cell.col}}`);
               }
-              return false;
+              return { conflict: true, iterations: iteration };
             }
           } else if (cell.value === '3') {
             if (cell.includedEdges.length === 3) {
@@ -1372,7 +1383,7 @@ export class SlitherlinkBoard {
               if (this.debugLevel > 0) {
                 console.log(`Cell value conflict for cell {${cell.row}, ${cell.col}}`);
               }
-              return false;
+              return { conflict: true, iterations: iteration };
             }
           }
         }
@@ -1430,11 +1441,11 @@ export class SlitherlinkBoard {
       }
 
       if (conflict) {
-        return false;
+        return { conflict: true, iterations: iteration };
       }
     }
 
-    return true;
+    return { conflict: false, iterations: iteration };
   }
 
   private markEdges(edges: (VEdge | HEdge | null | undefined)[], value: string): IMarkEdgeResult {

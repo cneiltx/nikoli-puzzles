@@ -24,8 +24,7 @@ export const VEdge = (props: IVEdgeProps) => {
       onContextMenu={(e) => {
         e.preventDefault();
         handleContextMenu(row, col);
-      }
-      }
+      }}
     >
     </div>
   );

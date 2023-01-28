@@ -73,8 +73,7 @@ export const Cell = (props: ICellProps) => {
         } else {
           handleContextMenu(row, col);
         }
-      }
-      }
+      }}
     >
       {value}
     </div>

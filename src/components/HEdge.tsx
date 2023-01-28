@@ -24,8 +24,7 @@ export const HEdge = (props: IHEdgeProps) => {
       onContextMenu={(e) => {
         e.preventDefault();
         handleContextMenu(row, col);
-      }
-      }
+      }}
     >
     </div>
   );

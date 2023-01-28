@@ -5,7 +5,7 @@ export const Dialog = (props: IDialogProps) => {
 
   const content: JSX.Element[] = [];
   if (buttons && handleButtonClick) {
-    buttons.forEach((button, index) => {
+    buttons.forEach((button) => {
       content.push(<button key={button} onClick={() => handleButtonClick(button)} >{button}</button>);
     });
   }

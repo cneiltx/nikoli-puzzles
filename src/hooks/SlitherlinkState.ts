@@ -57,7 +57,7 @@ export const SlitherlinkState = (rows: number, columns: number, difficulty: stri
         setStatus('solved');
       }, 100);
     }
-  }, [status, board]);
+  }, [status]);
 
   useEffect(() => {
     setCanUndo(undoStack.length > 0);

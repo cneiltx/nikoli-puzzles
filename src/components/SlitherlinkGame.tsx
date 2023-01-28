@@ -129,12 +129,12 @@ export const SlitherlinkGame = (props: ISlitherlinkGameProps) => {
         <button onClick={handleHelp}>
           <FontAwesomeIcon icon={faCircleInfo} />
         </button>
-        <button onClick={handleNewGame} disabled={!['playing', 'solved'].includes(game.status)}>New Game</button>
-        <button onClick={game.handleResetRequest} disabled={!['playing', 'solved'].includes(game.status)}>Reset</button>
-        <button onClick={game.handleUndo} disabled={!['playing', 'solved'].includes(game.status) || !game.canUndo}>
+        <button onClick={handleNewGame}>New Game</button>
+        <button onClick={game.handleResetRequest}>Reset</button>
+        <button onClick={game.handleUndo} disabled={game.status !== 'playing' || !game.canUndo}>
           <FontAwesomeIcon icon={faUndo} />
         </button>
-        <button onClick={game.handleRedo} disabled={!['playing', 'solved'].includes(game.status) || !game.canRedo}>
+        <button onClick={game.handleRedo} disabled={game.status !== 'playing' || !game.canRedo}>
           <FontAwesomeIcon icon={faRedo} />
         </button>
         <button onClick={game.handleSolveRequest} disabled={game.status !== 'playing'}>Solve</button>

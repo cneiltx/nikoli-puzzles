@@ -15,8 +15,7 @@ export const Corner = (props: ICornerProps) => {
       onContextMenu={(e) => {
         e.preventDefault();
         handleContextMenu(row, col);
-      }
-      }
+      }}
     >
       {value}
     </div>

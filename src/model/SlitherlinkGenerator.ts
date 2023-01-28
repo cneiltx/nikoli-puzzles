@@ -126,15 +126,16 @@ export class SlitherlinkGenerator {
       const cellValue = cell.value;
       board.cells[cell.row][cell.col].value = '';
 
-      let maxSolveIterations = 2;
+      let maxDepth = 1;
+
       if (difficulty === 'medium') {
-        maxSolveIterations = 4;
+        maxDepth = 2;
       } else if (difficulty === 'hard') {
-        maxSolveIterations = 6;
+        maxDepth = 3;
       }
 
       try {
-        board.solve(1, maxSolveIterations);
+        board.solve(maxDepth);
       } catch (e) {
         if (e instanceof MultipleSolutionsError || e instanceof MaxSolveDepthExceededError) {
           board.cells[cell.row][cell.col].value = cellValue;
